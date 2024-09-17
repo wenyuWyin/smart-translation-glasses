@@ -1,8 +1,8 @@
-# Project Name
+# 2024 TRON Capstone: Bridging Language Barriers with Smart Glasses
 
-Developer Names:
+Developer Names: Ding (Chris) Hao, Taoming Yu, Yimin (Jane) Pang, Xiang (Shawn) Zhang, Yucheng Yao, Wenyu (Winnie) Yin
 
-Date of project start:
+Date of project start: September 17, 2024
 
 This project is ...
 
