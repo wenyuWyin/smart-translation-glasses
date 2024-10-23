@@ -1,0 +1,12 @@
+# Path to the train and validation images
+train: D:/University/SFWRENG_4G06/test-files/dataset/images/train  # Full path to your train images
+val: D:/University/SFWRENG_4G06/test-files/dataset/images/val      # Full path to your validation images
+
+# Optional: Test images path
+test: D:/University/SFWRENG_4G06/test-files/dataset/images/test    # Full path to your test images (optional)
+
+# Number of classes (for DocLayNet, we have 11 classes)
+nc: 11
+
+# Class names
+names: ['Caption', 'Footnote', 'Formula', 'List-item', 'Page-footer', 'Page-header', 'Picture', 'Section-header', 'Table', 'Text', 'Title']

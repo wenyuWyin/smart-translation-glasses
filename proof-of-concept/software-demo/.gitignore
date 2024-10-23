@@ -1,0 +1,10 @@
+/*.pt
+/*.png
+
+/dataset/
+
+/runs/
+
+/coco_converted/
+
+/yolo_training/*
