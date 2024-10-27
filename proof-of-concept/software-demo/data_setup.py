@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 from ultralytics.data.converter import convert_coco
+import numpy as np
 
 # directory where all PNG images are stored
 png_dir = r'yolo_training\PNG'
@@ -59,11 +60,11 @@ def read_files(directory):
                 files_data[filepath] = file.readlines()
     return files_data
 
-# TODO: make this faster?
 def normalize_coordinates(data):
     """Normalize coordinates and ensure they are within bounds."""
     normalized_lines = []
-    for line in data:
+    #Oringinal code
+    """for line in data:
         numbers = [float(num) for num in line.split()]
         normalized_numbers = []
         for num in numbers:
@@ -71,6 +72,15 @@ def normalize_coordinates(data):
             normalized_numbers.append(normalized_num)
 
         normalized_lines.append(" ".join(map(str, normalized_numbers)) + "\n")
+    return normalized_lines"""
+    
+    for line in data:
+        numbers = np.array(list(map(float, line.split())))
+
+        # Normalize the numbers
+        normalized_numbers = np.clip(numbers, 0.0, 1.0)
+        normalized_lines.append(" ".join(map(str, normalized_numbers)) + "\n")
+    
     return normalized_lines
 
 def write_files(files_data):

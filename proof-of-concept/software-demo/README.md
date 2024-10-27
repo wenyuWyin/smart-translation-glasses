@@ -28,7 +28,13 @@ Another folder should be created to store YOLO-standard training data. The folde
 ```
 
 ### How to Use
-After ensuring the folder structure specified above, run `data_setup.py`. Check if the images and labels are in appropriate folders. Run `train_yolo_model_test.py` to train the YOLO model. Use the trained model by running the `layout_analysis_test.py` script.
+If a completed `yolov8n.pt` model is not currently in your root folder, please check ***How to train yolov8n.pt***.\
+Rename the png file as `target.png`, then use the trained model by running the `layout_analysis_test.py` script.
+
+### How to train `yolov8n.pt`
+1. After ensuring the folder structure specified above, run `data_setup.py`.
+2. Check if the images and labels are in appropriate folders, modify `data.yaml` to correct directory.
+3. Run `train_yolo_model_test.py` to train the YOLO model with Nvdia GPU.
 
 ### Requirement
 1. Download data set from [here](https://codait-cos-dax.s3.us.cloud-object-storage.appdomain.cloud/dax-doclaynet/1.0.0/DocLayNet_core.zip). Unzip the content into `yolo_training` folder.
