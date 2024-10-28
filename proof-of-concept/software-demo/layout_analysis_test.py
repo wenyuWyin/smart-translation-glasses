@@ -30,7 +30,7 @@ model = YOLO("capstone_yolov8_trained.pt")
 
 ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
-source = "target.png"
+source = "target.jpg"
 image = cv2.imread(source)
 
 results = model(image) 
