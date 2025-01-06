@@ -229,7 +229,7 @@ const HomeScreen = () => {
                                 onPress={() => {}}
                             >
                                 <Text className="text-white font-bold">
-                                    Submit
+                                    Save
                                 </Text>
                             </TouchableOpacity>
                         </View>
