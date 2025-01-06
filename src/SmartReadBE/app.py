@@ -86,10 +86,11 @@ def home():
 
 @app.route('/login')
 def login():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template('login.html')
+    print("!!!!!!!!!!!!!!!!!!!")
+    # if 'user' in session:
+    #     return redirect(url_for('dashboard'))
+    # else:
+    #     return render_template('login.html')
 
 @app.route('/signup')
 def signup():

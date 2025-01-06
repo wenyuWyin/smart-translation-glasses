@@ -11,6 +11,8 @@ import {
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 
+import { SERVER_IP_ADDRESS } from "react-native-dotenv";
+
 import { useUser } from "./contexts/userContext";
 import CommonButton from "./components/commonButton";
 
@@ -56,6 +58,15 @@ const LoginScreen = () => {
 
     const loginClicked = async () => {
         const name = "User A";
+        const response = await fetch(SERVER_IP_ADDRESS + '/login', {
+            method: "GET",
+            headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            },
+            // body: `ssid=${encodeURIComponent(
+            // networkName
+            // )}&password=${encodeURIComponent(networkPwd)}`,
+            });
         login(name);
 
         router.replace({
