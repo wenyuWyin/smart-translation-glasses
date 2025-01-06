@@ -39,3 +39,20 @@ Rename the png file as `target.png`, then use the trained model by running the `
 ### Requirement
 1. Download data set from [here](https://codait-cos-dax.s3.us.cloud-object-storage.appdomain.cloud/dax-doclaynet/1.0.0/DocLayNet_core.zip). Unzip the content into `yolo_training` folder.
 2. Run `pip install -r requirements.txt` to install all the required dependencies.
+
+
+Used technologies/data sources: YOLO from Ultralytics, PaddleOCR, Hugging Face, DocLayNet
+Step 1 - Download the DocLayNet data set from Hugging Face for training, validating, and testing the image layout analysis machine learning model.
+
+
+Note: The "PNG" folder is a giant folder that contains all the images for training, validation and testing.
+Step 2 - Since YOLO model training is not fully compatible with training labels in COCO format, the directory structure above needs to be converted to a standard structure specified in YOLO documentation (https://docs.ultralytics.com/modes/train/). 
+Step 2.0 - Create a new structure for the data set.
+
+Step 2.1 - Split images for training, validation, and testing from the "PNG" folder. Categorize images in the appropriate folder. 
+Step 2.2 - Convert labels in JSON format to YOLO-compatible .txt format using Ultralytics API (coco_convert)
+Step 2.3 - Handle failed edge cases during coco_convert
+https://github.com/ultralytics/yolov5/issues/10632 
+Step 3 - Create a YAML file to specify data set details, including the categories of images and paths to training/validation/testing data.
+Step 4 - Train the model
+Step 5 - Predict
