@@ -277,3 +277,13 @@ TSWLatexianTemp*
 
 # DS_Store file from Mac computers
 .DS_Store
+
+# Version environment
+*venv
+
+# Environment variables
+*.env
+
+# Firebase keys
+*firebaseAuth.json
+*firebaseConfig.py
