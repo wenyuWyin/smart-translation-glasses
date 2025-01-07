@@ -1,14 +1,14 @@
-from flask import Flask, redirect, render_template, request, make_response, session, abort, jsonify, url_for
-import secrets
-from functools import wraps
+from flask import Flask, request, render_template_string
 import firebase_admin
-from firebase_admin import credentials, firestore, auth
+from firebase_admin import credentials, firestore
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -20,121 +20,73 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # Adjust session e
 app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Can be 'Strict', 'Lax', or 'None'
 
-
-# Firebase Admin SDK setup
-# cred = credentials.Certificate("firebaseAuth.json")
-# firebase_admin.initialize_app(cred)
-# db = firestore.client()
-
-
 try:
+    # Firebase Admin SDK setup
     cred = credentials.Certificate("firebaseAuth.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
     # Attempt to fetch a collection (e.g., `test_collection`)
-    docs = db.collection('test_collection').get()
+    docs = db.collection('users').get()
     for doc in docs:
         print(f'{doc.id} => {doc.to_dict()}')
     print("Firebase connection successful!")
 except Exception as e:
     print(f"Firebase connection failed: {e}")
 
-
-
-
-########################################
-""" Authentication and Authorization """
-
-# Decorator for routes that require authentication
-def auth_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Check if user is authenticated
-        if 'user' not in session:
-            return redirect(url_for('login'))
-        
-        else:
-            return f(*args, **kwargs)
-        
-    return decorated_function
-
-
-@app.route('/auth', methods=['POST'])
-def authorize():
-    token = request.headers.get('Authorization')
-    if not token or not token.startswith('Bearer '):
-        return "Unauthorized", 401
-
-    token = token[7:]  # Strip off 'Bearer ' to get the actual token
-
-    try:
-        decoded_token = auth.verify_id_token(token) # Validate token here
-        session['user'] = decoded_token # Add user to session
-        return redirect(url_for('dashboard'))
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files and not request.data:
+        return "No file part", 400
     
-    except:
-        return "Unauthorized", 401
+    try:
+        image_data = request.data
+        filename = os.path.join(UPLOAD_FOLDER, "image.jpg")
+        with open(filename, 'wb') as f:
+            f.write(image_data)
+        print(f"Image is saved to {filename}")
+        return "Image received", 200
+    except Exception as e:
+        print(f"Error saving image: {e}")
+        return "Failed to save image", 500
+    
+@app.route('/lang-pref', methods=['POST'])
+def save_language_preference():
+    data = request.get_json() 
+    source_lang = data.get('sourceLang')
+    target_lang = data.get('targetLang')
+    
+    print(f'{source_lang} - {target_lang}')
+    
+    return "Language Preference Received", 200
 
-
-#####################
-""" Public Routes """
-
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return render_template('home.html')
-
-@app.route('/login')
-def login():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template('login.html')
-
-@app.route('/signup')
-def signup():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template('signup.html')
-
-
-@app.route('/reset-password')
-def reset_password():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template('forgot_password.html')
-
-@app.route('/terms')
-def terms():
-    return render_template('terms.html')
-
-@app.route('/privacy')
-def privacy():
-    return render_template('privacy.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)  # Remove the user from session
-    response = make_response(redirect(url_for('login')))
-    response.set_cookie('session', '', expires=0)  # Optionally clear the session cookie
-    return response
-
-
-##############################################
-""" Private Routes (Require authorization) """
-
-@app.route('/dashboard')
-@auth_required
-def dashboard():
-
-    return render_template('dashboard.html')
-
-
-
-
-
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sample Page</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome to My Flask Server</h1>
+        <p>This is a sample HTML response from a GET request.</p>
+    </body>
+    </html>
+    """
+    return render_template_string(html_content)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port = 5000)

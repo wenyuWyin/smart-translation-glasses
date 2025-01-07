@@ -15,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amujueee.SmartRead"
+      "bundleIdentifier": "com.amujueee.SmartRead",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +26,8 @@
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.amujueee.SmartRead"
+      "package": "com.amujueee.SmartRead",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,7 +42,9 @@
           ]
         }
       ],
-      "react-native-wifi-reborn"
+      "react-native-wifi-reborn",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ],
     "extra": {
       "router": {

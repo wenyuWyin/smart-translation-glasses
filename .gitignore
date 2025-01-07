@@ -287,3 +287,7 @@ TSWLatexianTemp*
 # Firebase keys
 *firebaseAuth.json
 *firebaseConfig.py
+
+# Firebase configuration files
+*google-services.json
+*GoogleService-Info.plist

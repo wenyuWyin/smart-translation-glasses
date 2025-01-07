@@ -3,6 +3,7 @@ import {
     View,
     Text,
     TextInput,
+    TouchableOpacity,
     PermissionsAndroid,
     KeyboardAvoidingView,
     ScrollView,
@@ -13,6 +14,7 @@ import { useFonts } from "expo-font";
 
 import { useUser } from "./contexts/userContext";
 import CommonButton from "./components/commonButton";
+import handleLogin from "./services/authService";
 
 const LoginScreen = () => {
     console.log("Login Page Rendered");
@@ -55,12 +57,21 @@ const LoginScreen = () => {
     };
 
     const loginClicked = async () => {
-        const name = "User A";
-        login(name);
+        const loginResult = await handleLogin(username, password);
+        console.log(loginResult);
 
-        router.replace({
-            pathname: "/home",
-        });
+        if (loginResult.status === 1) {
+            console.log("Log in successful using Firebase!");
+            router.replace({
+                pathname: "/home",
+            });
+        } else {
+            Alert.alert("Error", loginResult.message);
+        }
+    };
+
+    const registerClicked = async () => {
+        router.push('/signup');
     };
 
     // Load font
@@ -109,6 +120,16 @@ const LoginScreen = () => {
                         onPress={loginClicked}
                         atBottom={false}
                     />
+                    <View className="mt-5 pb-10 flex-row justify-center">
+                        <Text className="text-gray-700">
+                            Don't have an account?{" "}
+                        </Text>
+                        <TouchableOpacity onPress={registerClicked}>
+                            <Text className="text-blue-500 underline font-bold">
+                                Sign up
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>

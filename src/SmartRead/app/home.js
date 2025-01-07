@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
+import { SERVER_IP_ADDRESS } from "@env";
 import { Dropdown } from "react-native-element-dropdown";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -25,6 +26,7 @@ const HomeScreen = () => {
     console.log("Home Page Rendered");
 
     const { user, logout } = useUser();
+    const router = useRouter();
 
     // Language preference settings
     const [sourceLang, setSourceLang] = useState(null);
@@ -45,6 +47,25 @@ const HomeScreen = () => {
         { label: "Japanese", value: "4" },
         { label: "Italian", value: "5" },
     ];
+
+    // Send language preference to Firebase database through backend server
+    const submitLanguagePreference = async () => {
+        try {
+            console.log(SERVER_IP_ADDRESS + "/lang-pref");
+            const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    sourceLang: languageOptions[sourceLang - 1].label,
+                    targetLang: languageOptions[targetLang - 1].label
+                  })
+            });
+        } catch(error) {
+            console.log(`An error occurred when saving language preferences - ${error}`)
+        }
+    }
 
     // Navigate to system setting page for users to connect to the camera access point
     const connectToCamera = async () => {
@@ -126,6 +147,9 @@ const HomeScreen = () => {
                         IconComponent={
                             <MaterialCommunityIcon name="menu" size={30} />
                         }
+                        onPress={() => {
+                            router.replace("/login");
+                        }}
                     />
 
                     {/* Page Title */}
@@ -226,7 +250,7 @@ const HomeScreen = () => {
                         <View className="w-[80%] items-center">
                             <TouchableOpacity
                                 className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
-                                onPress={() => {}}
+                                onPress={submitLanguagePreference}
                             >
                                 <Text className="text-white font-bold">
                                     Save
