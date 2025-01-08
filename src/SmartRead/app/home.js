@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
     TextInput,
     Alert,
+    ActivityIndicator,
     Linking,
     KeyboardAvoidingView,
     ScrollView,
@@ -17,16 +18,35 @@ import { Dropdown } from "react-native-element-dropdown";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import WifiManager from "react-native-wifi-reborn";
+import auth from "@react-native-firebase/auth";
 
-import { useUser } from "./contexts/userContext";
 import styles from "./styles/styles";
 import TopLeftButton from "./components/topLeftButton";
 
 const HomeScreen = () => {
     console.log("Home Page Rendered");
 
-    const { user, logout } = useUser();
     const router = useRouter();
+
+    // Initialize a user
+    const [user, setUser] = useState();
+
+    const onAuthStateChanged = (user) => {
+        if (!user) {
+            console.error(
+                "Error",
+                "Unable to fetch user data. Please try again later."
+            );
+        } else {
+            setUser(user);
+        }
+    };
+
+    // Check log in state
+    useEffect(() => {
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber; // unsubscribe on unmount
+    }, []);
 
     // Language preference settings
     const [sourceLang, setSourceLang] = useState(null);
@@ -35,6 +55,7 @@ const HomeScreen = () => {
     const [isTargetFocus, setIsTargetFocus] = useState(false);
 
     // Camera network configurations
+    const [cameraConnecting, setCameraConnecting] = useState(false);
     const [networkName, setNetworkName] = useState("");
     const [networkPwd, setNetworkPwd] = useState("");
     const [pwdVisible, setPwdVisible] = useState(false);
@@ -53,19 +74,21 @@ const HomeScreen = () => {
         try {
             console.log(SERVER_IP_ADDRESS + "/lang-pref");
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
                     sourceLang: languageOptions[sourceLang - 1].label,
-                    targetLang: languageOptions[targetLang - 1].label
-                  })
+                    targetLang: languageOptions[targetLang - 1].label,
+                }),
             });
-        } catch(error) {
-            console.log(`An error occurred when saving language preferences - ${error}`)
+        } catch (error) {
+            console.log(
+                `An error occurred when saving language preferences - ${error}`
+            );
         }
-    }
+    };
 
     // Navigate to system setting page for users to connect to the camera access point
     const connectToCamera = async () => {
@@ -83,6 +106,7 @@ const HomeScreen = () => {
 
     // Send network configurations to camera
     const sendCredentialsToCamera = async () => {
+        setCameraConnecting(true);
         const currentSSID = await WifiManager.getCurrentWifiSSID();
         console.log(currentSSID);
 
@@ -92,7 +116,7 @@ const HomeScreen = () => {
 
             // Attempt to send the network configurations
             try {
-                const cameraUrl = "http://192.168.4.1/connect";
+                const cameraUrl = "http://192.168.4.1/addwifi";
 
                 // Send the configurations using an HTTPS POST request
                 const response = await fetch(cameraUrl, {
@@ -102,9 +126,12 @@ const HomeScreen = () => {
                     },
                     body: `ssid=${encodeURIComponent(
                         networkName
-                    )}&password=${encodeURIComponent(networkPwd)}`,
+                    )}&password=${encodeURIComponent(
+                        networkPwd
+                    )}&account=${encodeURIComponent(user.uid)}`,
                 });
 
+                setCameraConnecting(false);
                 if (response.ok) {
                     Alert.alert(
                         "Success",
@@ -116,6 +143,7 @@ const HomeScreen = () => {
                     );
                 }
             } catch (error) {
+                setCameraConnecting(false);
                 console.error("Failed to send credentials.", error);
                 Alert.alert(
                     "Error",
@@ -123,6 +151,7 @@ const HomeScreen = () => {
                 );
             }
         } else {
+            setCameraConnecting(false);
             console.log("Cannot connect");
             Alert.alert(
                 "Error",
@@ -332,14 +361,18 @@ const HomeScreen = () => {
                         </View>
 
                         <View className="w-[80%] items-center mb-5">
-                            <TouchableOpacity
-                                className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
-                                onPress={sendCredentialsToCamera}
-                            >
-                                <Text className="text-white font-bold">
-                                    Connect
-                                </Text>
-                            </TouchableOpacity>
+                            {cameraConnecting ? (
+                                <ActivityIndicator size="large" color="#ffffff" />
+                            ) : (
+                                <TouchableOpacity
+                                    className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
+                                    onPress={sendCredentialsToCamera}
+                                >
+                                    <Text className="text-white font-bold">
+                                        Connect
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
                 </View>

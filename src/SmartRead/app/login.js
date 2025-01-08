@@ -4,6 +4,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    ActivityIndicator,
     PermissionsAndroid,
     KeyboardAvoidingView,
     ScrollView,
@@ -23,10 +24,10 @@ const LoginScreen = () => {
         PlaywriteDEGrund: require("../assets/fonts/PlaywriteDEGrund-VariableFont_wght.ttf"),
     });
 
+    const [loginWait, setLoginWait] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
-    const { login } = useUser();
 
     // TODO: Move this to home page (when requesting network information)
     const requestPermissions = async () => {
@@ -57,8 +58,11 @@ const LoginScreen = () => {
     };
 
     const loginClicked = async () => {
+        setLoginWait(true);
         const loginResult = await handleLogin(username, password);
-        console.log(loginResult);
+        setLoginWait(false);
+
+        console.log(`Login response - ${loginResult}`);
 
         if (loginResult.status === 1) {
             console.log("Log in successful using Firebase!");
@@ -71,7 +75,7 @@ const LoginScreen = () => {
     };
 
     const registerClicked = async () => {
-        router.push('/signup');
+        router.push("/signup");
     };
 
     // Load font
@@ -91,6 +95,12 @@ const LoginScreen = () => {
             style={{ flex: 1 }}
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                {/* Login In Progress Overlay */}
+                {loginWait && (
+                    <View className="absolute inset-0 bg-black/50 justify-center items-center z-10">
+                        <ActivityIndicator size="large" color="#ffffff" />
+                    </View>
+                )}
                 {/* Login Form */}
                 <View className="flex-1 justify-center items-center bg-blue-100 p-4">
                     <Text
