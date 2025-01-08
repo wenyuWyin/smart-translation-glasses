@@ -1,17 +1,40 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Platform,KeyboardAvoidingView, ScrollView } from "react-native";
+import { Alert, View, Text, TextInput, Platform,KeyboardAvoidingView, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import CommonButton from "./components/commonButton";
 
+import { handleRegister } from "./services/authService";
+
 const SignupScreen = () => {
+    console.log("Signup Page Rendered");
+
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
 
-    const signupClicked = () => {
-        console.log("Signup details:", { username, email, password });
-        // Add your signup logic here
+    const signupClicked = async () => {
+        // Check if any of the fields is empty
+        if (!username) {
+            Alert.alert("Error", "Username cannot be empty.");
+            return ;
+        }
+        if (!email) {
+            Alert.alert("Error", "Email cannot be empty.");
+            return ;
+        }
+        if (!password) {
+            Alert.alert("Error", "Password cannot be empty.");
+            return ;
+        }
+
+        // Send signup request to backend
+        const signupResponse = await handleRegister(username, email, password);
+        if (!signupResponse.status) {
+            Alert.alert("Error", signupResponse.message);
+        } else {
+            router.replace("/home");
+        }
     };
 
     return (

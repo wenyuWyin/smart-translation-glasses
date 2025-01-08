@@ -14,7 +14,7 @@ import { useFonts } from "expo-font";
 
 import { useUser } from "./contexts/userContext";
 import CommonButton from "./components/commonButton";
-import handleLogin from "./services/authService";
+import { handleLogin } from "./services/authService";
 
 const LoginScreen = () => {
     console.log("Login Page Rendered");
