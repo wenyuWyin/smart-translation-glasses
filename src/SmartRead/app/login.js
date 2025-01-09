@@ -71,7 +71,7 @@ const LoginScreen = () => {
         const loginResult = await handleLogin(username, password);
         setLoginWait(false);
 
-        console.log(`Login response - ${loginResult}`);
+        console.log(`Login response - ${loginResult.status} - ${loginResult.message}`);
 
         if (loginResult.status === 1) {
             console.log("Log in successful using Firebase!");

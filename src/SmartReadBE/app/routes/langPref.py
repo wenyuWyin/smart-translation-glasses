@@ -4,6 +4,7 @@ lang_pref_bp = Blueprint('lang_pref', __name__)
 
 @lang_pref_bp.route('/lang-pref', methods=['POST'])
 def save_language_preference():
+    # TODO: Implement this
     data = request.get_json()
     source_lang = data.get('sourceLang')
     target_lang = data.get('targetLang')
