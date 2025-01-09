@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     View,
     Text,
@@ -21,12 +21,16 @@ import WifiManager from "react-native-wifi-reborn";
 import auth from "@react-native-firebase/auth";
 
 import styles from "../styles/styles";
-import TopLeftButton from "../components/topLeftButton";
+import TopRightButton from "../components/topRightButton";
+import { SetupContext } from "../contexts/setupContext";
 
 const HomeScreen = () => {
     console.log("Home Page Rendered");
 
     const router = useRouter();
+
+    const { step1Done, setStep1Done, step2Done, setStep2Done } =
+        useContext(SetupContext);
 
     // Initialize a user
     const [user, setUser] = useState();
@@ -53,15 +57,12 @@ const HomeScreen = () => {
     const [targetLang, setTargetLang] = useState(null);
     const [isSourceFocus, setIsSourceFocus] = useState(false);
     const [isTargetFocus, setIsTargetFocus] = useState(false);
-    const [stepOneDone, setStepOneDone] = useState(false);
 
     // Camera network configurations
     const [cameraConnecting, setCameraConnecting] = useState(false);
     const [networkName, setNetworkName] = useState("");
     const [networkPwd, setNetworkPwd] = useState("");
     const [pwdVisible, setPwdVisible] = useState(false);
-    const [steTwoDone, setStepTwoDone] = useState(false);
-    const [steThreeDone, setStepThreeDone] = useState(false);
 
     // All language options
     const languageOptions = [
@@ -74,6 +75,15 @@ const HomeScreen = () => {
 
     // Send language preference to Firebase database through backend server
     const submitLanguagePreference = async () => {
+        if (!sourceLang) {
+            Alert.alert("Error", "Please select a source language.");
+            return;
+        }
+        if (!targetLang) {
+            Alert.alert("Error", "Please select a target language.");
+            return;
+        }
+
         try {
             console.log(SERVER_IP_ADDRESS + "/lang-pref");
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
@@ -86,6 +96,8 @@ const HomeScreen = () => {
                     targetLang: languageOptions[targetLang - 1].label,
                 }),
             });
+
+            setStep1Done(true);
         } catch (error) {
             console.log(
                 `An error occurred when saving language preferences - ${error}`
@@ -140,7 +152,7 @@ const HomeScreen = () => {
                         "Success",
                         "Credentials are sent to your device!"
                     );
-                    router.push('/result');
+                    router.push("/result");
                 } else {
                     throw new Error(
                         `${response.status} - ${response.statusText}`
@@ -176,7 +188,7 @@ const HomeScreen = () => {
             >
                 <View className="flex-1 bg-blue-100 h-[100%] items-center">
                     {/* Left Menu Button */}
-                    <TopLeftButton
+                    <TopRightButton
                         IconComponent={
                             <MaterialCommunityIcon name="menu" size={30} />
                         }
@@ -185,29 +197,17 @@ const HomeScreen = () => {
                         }}
                     />
 
-                    {/* Page Title */}
-                    <View className="flex-row justify-center w-[72%] mt-5">
-                        <Text className="text-xl font-bold">
-                            Getting Started
-                        </Text>
-                    </View>
-
                     {/* Step 1 - Specify Language Preferences */}
                     <View className="w-[90%] flex-col items-center py-3">
-                        <View className="flex-row items-center mb-4">
-                            <MaterialIcon
-                                name="looks-one"
-                                size={20}
-                                className="mr-2"
-                            />
-                            <Text className="text-lg font-medium">
-                                Specify your language preferences
+                        <View className="flex-row items-start mb-4 mt-8">
+                            <Text className="text-lg font-bold">
+                                Specify your Language Preferences
                             </Text>
                         </View>
 
                         {/* Selection Dropdowns */}
                         <View className="flex-col w-[80%] mb-4">
-                            <Text className="text-left text-xl mb-2">
+                            <Text className="text-left text-lg mb-2">
                                 From:{" "}
                             </Text>
                             <Dropdown
@@ -245,7 +245,7 @@ const HomeScreen = () => {
                         </View>
 
                         <View className="flex-col w-[80%] mb-4">
-                            <Text className="text-left text-xl mb-2">To: </Text>
+                            <Text className="text-left text-lg mb-2">To: </Text>
                             <Dropdown
                                 style={[
                                     styles.dropdown,
@@ -294,16 +294,22 @@ const HomeScreen = () => {
 
                     <View className="border-b-2 border-black w-[90%] my-5" />
 
-                    {/* Step 2 - Connect Phone to Camera (Microcontroller) */}
-                    <View className="w-[90%] flex-col items-center py-5">
-                        <View className="flex-row items-center mb-4 w-[87%]">
+                    {/* Step 2 - Connect Microcontroller to Wifi */}
+                    <View className="w-[90%] flex-col items-center mb-4">
+                        <Text className="text-lg font-bold">
+                            Connect your Device to a Wi-Fi
+                        </Text>
+                    </View>
+
+                    <View className="w-[90%] flex-col items-center pb-5">
+                        <View className="flex-row items-center mb-4 min-w-[90%]">
                             <MaterialIcon
-                                name="looks-two"
+                                name="looks-one"
                                 size={20}
                                 className="mr-2"
                             />
-                            <Text className="text-lg font-medium">
-                                Connect this app to your device
+                            <Text className="text-lg">
+                                Connect to "ESP32_CAM_AP" Wi-Fi
                             </Text>
                         </View>
 
@@ -317,20 +323,15 @@ const HomeScreen = () => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
 
-                    <View className="border-b-2 border-black w-[90%] my-5" />
-
-                    {/* Step 3 - Send Network Name and Password to Camera */}
-                    <View className="w-[90%] flex-col items-center py-5">
-                        <View className="flex-row items-center mb-4">
+                        <View className="flex-row items-center mb-4 mt-8 min-w-[90%]">
                             <MaterialIcon
-                                name="looks-3"
+                                name="looks-two"
                                 size={20}
                                 className="mr-2"
                             />
-                            <Text className="text-lg font-medium">
-                                Connect your device to a network
+                            <Text className="text-lg">
+                                Send a Wi-Fi to your Device
                             </Text>
                         </View>
 
@@ -366,7 +367,10 @@ const HomeScreen = () => {
 
                         <View className="w-[80%] items-center mb-5">
                             {cameraConnecting ? (
-                                <ActivityIndicator size="large" color="#ffffff" />
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#ffffff"
+                                />
                             ) : (
                                 <TouchableOpacity
                                     className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
@@ -379,6 +383,8 @@ const HomeScreen = () => {
                             )}
                         </View>
                     </View>
+
+                    <View className="w-[90%] flex-col items-center py-5"></View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
