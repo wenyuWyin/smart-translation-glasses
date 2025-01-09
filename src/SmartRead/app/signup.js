@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { Alert, View, Text, TextInput, Platform,KeyboardAvoidingView, ScrollView } from "react-native";
+import { 
+    Alert, 
+    View, 
+    Text, 
+    TextInput, 
+    Platform,
+    KeyboardAvoidingView, 
+    ScrollView,
+    TouchableOpacity,
+} from "react-native";
 import { useRouter } from "expo-router";
 import CommonButton from "./components/commonButton";
+
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import { handleRegister } from "./services/authService";
 
@@ -11,6 +22,7 @@ const SignupScreen = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [pwdVisible, setPwdVisible] = useState(true);
     const router = useRouter();
 
     const signupClicked = async () => {
@@ -33,7 +45,7 @@ const SignupScreen = () => {
         if (!signupResponse.status) {
             Alert.alert("Error", signupResponse.message);
         } else {
-            router.replace("/home");
+            router.replace("/login");
         }
     };
 
@@ -54,25 +66,53 @@ const SignupScreen = () => {
                     >
                         Create an Account
                     </Text>
-                    <TextInput
-                        placeholder="Enter username"
-                        value={username}
-                        onChangeText={setUsername}
-                        className="border border-gray-400 rounded-lg p-3 w-3/4 mb-4 bg-white"
-                    />
-                    <TextInput
-                        placeholder="Enter email"
-                        value={email}
-                        onChangeText={setEmail}
-                        className="border border-gray-400 rounded-lg p-3 w-3/4 mb-4 bg-white"
-                    />
-                    <TextInput
-                        placeholder="Enter password"
-                        value={password}
-                        secureTextEntry
-                        onChangeText={setPassword}
-                        className="border border-gray-400 rounded-lg p-3 w-3/4 mb-4 bg-white"
-                    />
+                    <View className="w-[80%] relative mt-10 mb-4">
+                        <Text className="absolute text-sm left-2 -top-6 font-semibold">
+                            Username
+                        </Text>
+                        <TextInput
+                            placeholder={"Enter username"}
+                            placeholderTextColor="gray"
+                            value={username}
+                            onChangeText={setUsername}
+                            className="border border-gray-400 rounded-lg p-3 mb-4 bg-white w-[100%]"
+                        />
+                    </View>
+                    <View className="w-[80%] relative mb-4">
+                        <Text className="absolute text-sm left-2 -top-6 font-semibold">
+                            Email
+                        </Text>
+                        <TextInput
+                            placeholder={"Enter email"}
+                            placeholderTextColor="gray"
+                            value={email}
+                            onChangeText={setEmail}
+                            className="border border-gray-400 rounded-lg p-3 mb-4 bg-white w-[100%]"
+                        />
+                    </View>
+                    <View className="w-[80%] relative mb-5">
+                        <Text className="absolute text-sm left-2 -top-6 font-semibold">
+                            Password
+                        </Text>
+                        <TextInput
+                            placeholder={"Enter password"}
+                            placeholderTextColor="gray"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={pwdVisible}
+                            className="border border-gray-400 rounded-lg p-3 bg-white w-[100%]"
+                        />
+                        <TouchableOpacity
+                            onPress={() => setPwdVisible(!pwdVisible)}
+                            className="absolute right-3 top-2"
+                        >
+                            <MaterialCommunityIcon
+                                name={pwdVisible ? "eye-off" : "eye"}
+                                size={24}
+                                color="#888"
+                            />
+                        </TouchableOpacity>
+                    </View>
                     <CommonButton
                         title="Sign Up"
                         onPress={signupClicked}
