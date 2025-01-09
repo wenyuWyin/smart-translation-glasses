@@ -9,6 +9,7 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     Platform,
+    Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
@@ -58,6 +59,11 @@ const LoginScreen = () => {
     };
 
     const loginClicked = async () => {
+        if (!username || !password) {
+            Alert.alert("Error", "Please enter both username and password.");
+            return;
+        }
+
         setLoginWait(true);
         const loginResult = await handleLogin(username, password);
         setLoginWait(false);
@@ -75,7 +81,7 @@ const LoginScreen = () => {
     };
 
     const registerClicked = async () => {
-        router.push("/signup");
+        router.replace("/signup");
     };
 
     // Load font

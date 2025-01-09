@@ -17,15 +17,15 @@ const SignupScreen = () => {
         // Check if any of the fields is empty
         if (!username) {
             Alert.alert("Error", "Username cannot be empty.");
-            return ;
+            return;
         }
         if (!email) {
             Alert.alert("Error", "Email cannot be empty.");
-            return ;
+            return;
         }
         if (!password) {
             Alert.alert("Error", "Password cannot be empty.");
-            return ;
+            return;
         }
 
         // Send signup request to backend
