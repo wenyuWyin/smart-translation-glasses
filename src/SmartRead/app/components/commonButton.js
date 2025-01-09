@@ -5,7 +5,7 @@ import { View, TouchableOpacity, Text } from "react-native";
 const CommonButton = ({ title, onPress, atBottom=true }) => {
     return (
         <View className={`${atBottom ? "absolute bottom-10 left-0 right-0" : ""} items-center`}>
-            <View className="w-[50%]">
+            <View>
                 <TouchableOpacity
                     onPress={onPress}
                     className="rounded-lg bg-indigo-200 py-2 px-5 self-center"
@@ -15,6 +15,7 @@ const CommonButton = ({ title, onPress, atBottom=true }) => {
                         shadowOpacity: 0.2,
                         shadowRadius: 2,
                         elevation: 3,
+                        maxWidth: 200,
                     }}
                 >
                     <Text className="text-black text-xl font-bold text-center">

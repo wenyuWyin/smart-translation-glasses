@@ -291,3 +291,14 @@ TSWLatexianTemp*
 # Firebase configuration files
 *google-services.json
 *GoogleService-Info.plist
+
+<<<<<<< HEAD
+# Google Cloud Translation Config
+*application_default_credentials.json
+
+# Jupyter notebook - basically for testing
+*.ipynb
+=======
+# pycache
+*__pycache__
+>>>>>>> 162cc040c4efaa8f315bc55a442e7e8985f7f6bb
