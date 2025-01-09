@@ -20,8 +20,8 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import WifiManager from "react-native-wifi-reborn";
 import auth from "@react-native-firebase/auth";
 
-import styles from "./styles/styles";
-import TopLeftButton from "./components/topLeftButton";
+import styles from "../styles/styles";
+import TopLeftButton from "../components/topLeftButton";
 
 const HomeScreen = () => {
     console.log("Home Page Rendered");
@@ -53,12 +53,15 @@ const HomeScreen = () => {
     const [targetLang, setTargetLang] = useState(null);
     const [isSourceFocus, setIsSourceFocus] = useState(false);
     const [isTargetFocus, setIsTargetFocus] = useState(false);
+    const [stepOneDone, setStepOneDone] = useState(false);
 
     // Camera network configurations
     const [cameraConnecting, setCameraConnecting] = useState(false);
     const [networkName, setNetworkName] = useState("");
     const [networkPwd, setNetworkPwd] = useState("");
     const [pwdVisible, setPwdVisible] = useState(false);
+    const [steTwoDone, setStepTwoDone] = useState(false);
+    const [steThreeDone, setStepThreeDone] = useState(false);
 
     // All language options
     const languageOptions = [
@@ -137,6 +140,7 @@ const HomeScreen = () => {
                         "Success",
                         "Credentials are sent to your device!"
                     );
+                    router.push('/result');
                 } else {
                     throw new Error(
                         `${response.status} - ${response.statusText}`
@@ -163,7 +167,7 @@ const HomeScreen = () => {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 120}
             style={{ flex: 1 }}
         >
             <ScrollView
