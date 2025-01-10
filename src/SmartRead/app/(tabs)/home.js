@@ -52,7 +52,54 @@ const HomeScreen = () => {
         return subscriber; // unsubscribe on unmount
     }, []);
 
+    useEffect(() => {
+        const fetchLanguagePref = async () => {
+            if (user) {
+                try {
+                    setLangLoading(true);
+                    const response = await fetch(
+                        SERVER_IP_ADDRESS + `/lang-pref?uid=${user.uid}`,
+                        {
+                            method: "GET",
+                        }
+                    );
+                    setLangLoading(false);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const source = data["source-lang"];
+                        const target = data["target-lang"];
+                        if (source && target) {
+                            console.log(
+                                `Got language preferences from db - ${source} to ${target}`
+                            );
+                            const sourceIndex =
+                                languageOptions.findIndex(
+                                    (lang) => lang.label === source
+                                ) + 1;
+                            const targetIndex =
+                                languageOptions.findIndex(
+                                    (lang) => lang.label === target
+                                ) + 1;
+                            setSourceLang(sourceIndex.toString());
+                            setTargetLang(targetIndex.toString());
+                            setStep1Done(true);
+                        }
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error("Error in GET request", error);
+                    Alert.alert("Error", `Error in GET request: ${error}`);
+                }
+            }
+        };
+        fetchLanguagePref();
+    }, [user]);
+
     // Language preference settings
+    const [langLoading, setLangLoading] = useState(false);
     const [sourceLang, setSourceLang] = useState(null);
     const [targetLang, setTargetLang] = useState(null);
     const [isSourceFocus, setIsSourceFocus] = useState(false);
@@ -75,6 +122,13 @@ const HomeScreen = () => {
 
     // Send language preference to Firebase database through backend server
     const submitLanguagePreference = async () => {
+        if (!user) {
+            Alert.alert(
+                "Error",
+                "You must login to submit language preferences."
+            );
+            return;
+        }
         if (!sourceLang) {
             Alert.alert("Error", "Please select a source language.");
             return;
@@ -83,20 +137,26 @@ const HomeScreen = () => {
             Alert.alert("Error", "Please select a target language.");
             return;
         }
+        if (sourceLang === targetLang) {
+            Alert.alert("Error", "Source and target languages need to be different.");
+            return ;
+        }
 
         try {
-            console.log(SERVER_IP_ADDRESS + "/lang-pref");
+            setLangLoading(true);
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    uid: user.uid,
                     sourceLang: languageOptions[sourceLang - 1].label,
                     targetLang: languageOptions[targetLang - 1].label,
                 }),
             });
 
+            setLangLoading(false);
             setStep1Done(true);
         } catch (error) {
             console.log(
@@ -281,14 +341,21 @@ const HomeScreen = () => {
                         </View>
 
                         <View className="w-[80%] items-center">
-                            <TouchableOpacity
-                                className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
-                                onPress={submitLanguagePreference}
-                            >
-                                <Text className="text-white font-bold">
-                                    Save
-                                </Text>
-                            </TouchableOpacity>
+                            {langLoading ? (
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#ffffff"
+                                />
+                            ) : (
+                                <TouchableOpacity
+                                    className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
+                                    onPress={submitLanguagePreference}
+                                >
+                                    <Text className="text-white font-bold">
+                                        {step1Done ? "Update" : "Save"}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
 
