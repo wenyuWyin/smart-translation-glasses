@@ -14,6 +14,8 @@ import {
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+
 import { useUser } from "./contexts/userContext";
 import CommonButton from "./components/commonButton";
 import { handleLogin } from "./services/authService";
@@ -28,6 +30,7 @@ const LoginScreen = () => {
     const [loginWait, setLoginWait] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [pwdVisible, setPwdVisible] = useState(true);
     const router = useRouter();
 
     // TODO: Move this to home page (when requesting network information)
@@ -68,7 +71,7 @@ const LoginScreen = () => {
         const loginResult = await handleLogin(username, password);
         setLoginWait(false);
 
-        console.log(`Login response - ${loginResult}`);
+        console.log(`Login response - ${loginResult.status} - ${loginResult.message}`);
 
         if (loginResult.status === 1) {
             console.log("Log in successful using Firebase!");
@@ -119,18 +122,45 @@ const LoginScreen = () => {
                     >
                         SmartRead
                     </Text>
-                    <TextInput
-                        placeholder="Enter username"
-                        value={username}
-                        onChangeText={setUsername}
-                        className="border border-gray-400 rounded-lg p-3 w-3/4 mb-4 bg-white"
-                    />
-                    <TextInput
-                        placeholder="Enter password"
-                        value={password}
-                        onChangeText={setPassword}
-                        className="border border-gray-400 rounded-lg p-3 w-3/4 mb-4 bg-white"
-                    />
+
+                    <View className="items-center w-[100%] mt-10 mb-5">
+                        <View className="w-[80%] relative mb-4">
+                            <Text className="absolute text-sm left-2 -top-6 font-semibold">
+                                Email
+                            </Text>
+                            <TextInput
+                                placeholder={"Enter email"}
+                                placeholderTextColor="gray"
+                                value={username}
+                                onChangeText={setUsername}
+                                className="border border-gray-400 rounded-lg p-3 bg-white w-[100%]"
+                            />
+                        </View>
+
+                        <View className="w-[80%] relative my-4">
+                            <Text className="absolute text-sm left-2 -top-6 font-semibold">
+                                Password
+                            </Text>
+                            <TextInput
+                                placeholder={"Enter password"}
+                                placeholderTextColor="gray"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry={pwdVisible}
+                                className="border border-gray-400 rounded-lg p-3 bg-white w-[100%]"
+                            />
+                            <TouchableOpacity
+                                onPress={() => setPwdVisible(!pwdVisible)}
+                                className="absolute right-3 top-2"
+                            >
+                                <MaterialCommunityIcon
+                                    name={pwdVisible ? "eye-off" : "eye"}
+                                    size={24}
+                                    color="#888"
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                     <CommonButton
                         title="Login"
                         onPress={loginClicked}

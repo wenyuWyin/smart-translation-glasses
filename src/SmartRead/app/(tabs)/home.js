@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     View,
     Text,
@@ -20,13 +20,17 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import WifiManager from "react-native-wifi-reborn";
 import auth from "@react-native-firebase/auth";
 
-import styles from "./styles/styles";
-import TopLeftButton from "./components/topLeftButton";
+import styles from "../styles/styles";
+import TopRightButton from "../components/topRightButton";
+import { SetupContext } from "../contexts/setupContext";
 
 const HomeScreen = () => {
     console.log("Home Page Rendered");
 
     const router = useRouter();
+
+    const { step1Done, setStep1Done, step2Done, setStep2Done } =
+        useContext(SetupContext);
 
     // Initialize a user
     const [user, setUser] = useState();
@@ -48,7 +52,54 @@ const HomeScreen = () => {
         return subscriber; // unsubscribe on unmount
     }, []);
 
+    useEffect(() => {
+        const fetchLanguagePref = async () => {
+            if (user) {
+                try {
+                    setLangLoading(true);
+                    const response = await fetch(
+                        SERVER_IP_ADDRESS + `/lang-pref?uid=${user.uid}`,
+                        {
+                            method: "GET",
+                        }
+                    );
+                    setLangLoading(false);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const source = data["source-lang"];
+                        const target = data["target-lang"];
+                        if (source && target) {
+                            console.log(
+                                `Got language preferences from db - ${source} to ${target}`
+                            );
+                            const sourceIndex =
+                                languageOptions.findIndex(
+                                    (lang) => lang.label === source
+                                ) + 1;
+                            const targetIndex =
+                                languageOptions.findIndex(
+                                    (lang) => lang.label === target
+                                ) + 1;
+                            setSourceLang(sourceIndex.toString());
+                            setTargetLang(targetIndex.toString());
+                            setStep1Done(true);
+                        }
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error("Error in GET request", error);
+                    Alert.alert("Error", `Error in GET request: ${error}`);
+                }
+            }
+        };
+        fetchLanguagePref();
+    }, [user]);
+
     // Language preference settings
+    const [langLoading, setLangLoading] = useState(false);
     const [sourceLang, setSourceLang] = useState(null);
     const [targetLang, setTargetLang] = useState(null);
     const [isSourceFocus, setIsSourceFocus] = useState(false);
@@ -71,18 +122,42 @@ const HomeScreen = () => {
 
     // Send language preference to Firebase database through backend server
     const submitLanguagePreference = async () => {
+        if (!user) {
+            Alert.alert(
+                "Error",
+                "You must login to submit language preferences."
+            );
+            return;
+        }
+        if (!sourceLang) {
+            Alert.alert("Error", "Please select a source language.");
+            return;
+        }
+        if (!targetLang) {
+            Alert.alert("Error", "Please select a target language.");
+            return;
+        }
+        if (sourceLang === targetLang) {
+            Alert.alert("Error", "Source and target languages need to be different.");
+            return ;
+        }
+
         try {
-            console.log(SERVER_IP_ADDRESS + "/lang-pref");
+            setLangLoading(true);
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    uid: user.uid,
                     sourceLang: languageOptions[sourceLang - 1].label,
                     targetLang: languageOptions[targetLang - 1].label,
                 }),
             });
+
+            setLangLoading(false);
+            setStep1Done(true);
         } catch (error) {
             console.log(
                 `An error occurred when saving language preferences - ${error}`
@@ -137,6 +212,7 @@ const HomeScreen = () => {
                         "Success",
                         "Credentials are sent to your device!"
                     );
+                    router.push("/result");
                 } else {
                     throw new Error(
                         `${response.status} - ${response.statusText}`
@@ -163,7 +239,7 @@ const HomeScreen = () => {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 120}
             style={{ flex: 1 }}
         >
             <ScrollView
@@ -172,7 +248,7 @@ const HomeScreen = () => {
             >
                 <View className="flex-1 bg-blue-100 h-[100%] items-center">
                     {/* Left Menu Button */}
-                    <TopLeftButton
+                    <TopRightButton
                         IconComponent={
                             <MaterialCommunityIcon name="menu" size={30} />
                         }
@@ -181,29 +257,17 @@ const HomeScreen = () => {
                         }}
                     />
 
-                    {/* Page Title */}
-                    <View className="flex-row justify-center w-[72%] mt-5">
-                        <Text className="text-xl font-bold">
-                            Getting Started
-                        </Text>
-                    </View>
-
                     {/* Step 1 - Specify Language Preferences */}
                     <View className="w-[90%] flex-col items-center py-3">
-                        <View className="flex-row items-center mb-4">
-                            <MaterialIcon
-                                name="looks-one"
-                                size={20}
-                                className="mr-2"
-                            />
-                            <Text className="text-lg font-medium">
-                                Specify your language preferences
+                        <View className="flex-row items-start mb-4 mt-8">
+                            <Text className="text-lg font-bold">
+                                Specify your Language Preferences
                             </Text>
                         </View>
 
                         {/* Selection Dropdowns */}
                         <View className="flex-col w-[80%] mb-4">
-                            <Text className="text-left text-xl mb-2">
+                            <Text className="text-left text-lg mb-2">
                                 From:{" "}
                             </Text>
                             <Dropdown
@@ -241,7 +305,7 @@ const HomeScreen = () => {
                         </View>
 
                         <View className="flex-col w-[80%] mb-4">
-                            <Text className="text-left text-xl mb-2">To: </Text>
+                            <Text className="text-left text-lg mb-2">To: </Text>
                             <Dropdown
                                 style={[
                                     styles.dropdown,
@@ -277,29 +341,42 @@ const HomeScreen = () => {
                         </View>
 
                         <View className="w-[80%] items-center">
-                            <TouchableOpacity
-                                className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
-                                onPress={submitLanguagePreference}
-                            >
-                                <Text className="text-white font-bold">
-                                    Save
-                                </Text>
-                            </TouchableOpacity>
+                            {langLoading ? (
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#ffffff"
+                                />
+                            ) : (
+                                <TouchableOpacity
+                                    className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
+                                    onPress={submitLanguagePreference}
+                                >
+                                    <Text className="text-white font-bold">
+                                        {step1Done ? "Update" : "Save"}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
 
                     <View className="border-b-2 border-black w-[90%] my-5" />
 
-                    {/* Step 2 - Connect Phone to Camera (Microcontroller) */}
-                    <View className="w-[90%] flex-col items-center py-5">
-                        <View className="flex-row items-center mb-4 w-[87%]">
+                    {/* Step 2 - Connect Microcontroller to Wifi */}
+                    <View className="w-[90%] flex-col items-center mb-4">
+                        <Text className="text-lg font-bold">
+                            Connect your Device to a Wi-Fi
+                        </Text>
+                    </View>
+
+                    <View className="w-[90%] flex-col items-center pb-5">
+                        <View className="flex-row items-center mb-4 min-w-[90%]">
                             <MaterialIcon
-                                name="looks-two"
+                                name="looks-one"
                                 size={20}
                                 className="mr-2"
                             />
-                            <Text className="text-lg font-medium">
-                                Connect this app to your device
+                            <Text className="text-lg">
+                                Connect to "ESP32_CAM_AP" Wi-Fi
                             </Text>
                         </View>
 
@@ -313,20 +390,15 @@ const HomeScreen = () => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
 
-                    <View className="border-b-2 border-black w-[90%] my-5" />
-
-                    {/* Step 3 - Send Network Name and Password to Camera */}
-                    <View className="w-[90%] flex-col items-center py-5">
-                        <View className="flex-row items-center mb-4">
+                        <View className="flex-row items-center mb-4 mt-8 min-w-[90%]">
                             <MaterialIcon
-                                name="looks-3"
+                                name="looks-two"
                                 size={20}
                                 className="mr-2"
                             />
-                            <Text className="text-lg font-medium">
-                                Connect your device to a network
+                            <Text className="text-lg">
+                                Send a Wi-Fi to your Device
                             </Text>
                         </View>
 
@@ -344,7 +416,7 @@ const HomeScreen = () => {
                                     placeholder="Enter network password"
                                     value={networkPwd}
                                     onChangeText={setNetworkPwd}
-                                    secureTextEntry={!pwdVisible}
+                                    secureTextEntry={pwdVisible}
                                     className="border border-gray-400 rounded-lg p-3 pr-12 bg-white w-[100%]"
                                 />
                                 <TouchableOpacity
@@ -362,7 +434,10 @@ const HomeScreen = () => {
 
                         <View className="w-[80%] items-center mb-5">
                             {cameraConnecting ? (
-                                <ActivityIndicator size="large" color="#ffffff" />
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#ffffff"
+                                />
                             ) : (
                                 <TouchableOpacity
                                     className="px-3 py-2 bg-blue-950 rounded-lg w-[50%] items-center"
@@ -375,6 +450,8 @@ const HomeScreen = () => {
                             )}
                         </View>
                     </View>
+
+                    <View className="w-[90%] flex-col items-center py-5"></View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
