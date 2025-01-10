@@ -416,7 +416,7 @@ const HomeScreen = () => {
                                     placeholder="Enter network password"
                                     value={networkPwd}
                                     onChangeText={setNetworkPwd}
-                                    secureTextEntry={!pwdVisible}
+                                    secureTextEntry={pwdVisible}
                                     className="border border-gray-400 rounded-lg p-3 pr-12 bg-white w-[100%]"
                                 />
                                 <TouchableOpacity
