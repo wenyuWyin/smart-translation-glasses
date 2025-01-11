@@ -18,6 +18,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import WifiManager from "react-native-wifi-reborn";
+import NetInfo from "@react-native-community/netinfo";
 import auth from "@react-native-firebase/auth";
 
 import styles from "../styles/styles";
@@ -29,8 +30,18 @@ const HomeScreen = () => {
 
     const router = useRouter();
 
-    const { step1Done, setStep1Done, step2Done, setStep2Done } =
-        useContext(SetupContext);
+    const {
+        langPrefDone,
+        setLangPrefDone,
+        deviceConnected,
+        setDeviceConnected,
+        appConnected,
+        SetAppConnected,
+        temp,
+        setTemp,
+        battery,
+        setBattery,
+    } = useContext(SetupContext);
 
     // Initialize a user
     const [user, setUser] = useState();
@@ -42,6 +53,7 @@ const HomeScreen = () => {
                 "Unable to fetch user data. Please try again later."
             );
         } else {
+            console.log(`Got user from db - ${user.uid}`);
             setUser(user);
         }
     };
@@ -52,6 +64,7 @@ const HomeScreen = () => {
         return subscriber; // unsubscribe on unmount
     }, []);
 
+    // Fetch language preferences from database when a user is set
     useEffect(() => {
         const fetchLanguagePref = async () => {
             if (user) {
@@ -69,6 +82,7 @@ const HomeScreen = () => {
                         const data = await response.json();
                         const source = data["source-lang"];
                         const target = data["target-lang"];
+                        // Set relevant properties for the selection dropdowns
                         if (source && target) {
                             console.log(
                                 `Got language preferences from db - ${source} to ${target}`
@@ -83,7 +97,7 @@ const HomeScreen = () => {
                                 ) + 1;
                             setSourceLang(sourceIndex.toString());
                             setTargetLang(targetIndex.toString());
-                            setStep1Done(true);
+                            setLangPrefDone(true);
                         }
                     } else {
                         const data = await response.json();
@@ -97,6 +111,32 @@ const HomeScreen = () => {
         };
         fetchLanguagePref();
     }, [user]);
+
+    // Define event listener for Wi-Fi state changes
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(async (state) => {
+            if (state.type === "wifi") {
+                setTimeout(async () => {
+                    try {
+                        const currentSSID =
+                            await WifiManager.getCurrentWifiSSID();
+                        console.log("Current SSID:", currentSSID);
+
+                        if (currentSSID !== "ESP32_CAM_AP") {
+                            console.log("User connected to a local network!");
+                            SetAppConnected(true);
+                        } else {
+                            SetAppConnected(false);
+                        }
+                    } catch (error) {
+                        console.error("Error getting SSID:", error);
+                    }
+                }, 1000); // Delay for 1 second after the event to ensure SSID is ready
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     // Language preference settings
     const [langLoading, setLangLoading] = useState(false);
@@ -138,11 +178,15 @@ const HomeScreen = () => {
             return;
         }
         if (sourceLang === targetLang) {
-            Alert.alert("Error", "Source and target languages need to be different.");
-            return ;
+            Alert.alert(
+                "Error",
+                "Source and target languages need to be different."
+            );
+            return;
         }
 
         try {
+            // Store language preferences in the database 
             setLangLoading(true);
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
                 method: "POST",
@@ -157,7 +201,7 @@ const HomeScreen = () => {
             });
 
             setLangLoading(false);
-            setStep1Done(true);
+            setLangPrefDone(true);
         } catch (error) {
             console.log(
                 `An error occurred when saving language preferences - ${error}`
@@ -181,57 +225,48 @@ const HomeScreen = () => {
 
     // Send network configurations to camera
     const sendCredentialsToCamera = async () => {
-        setCameraConnecting(true);
-        const currentSSID = await WifiManager.getCurrentWifiSSID();
-        console.log(currentSSID);
+        if (appConnected) {
+            Alert.alert("Error", "Please connect your phone to ESP32_CAM_AP.");
+            return;
+        }
 
         // Send the configuration only when the phone is connected to the camera access point
-        if (currentSSID === "ESP32_CAM_AP") {
-            console.log("Device succesffully connected to the device.");
+        console.log("Device succesffully connected to the device.");
 
-            // Attempt to send the network configurations
-            try {
-                const cameraUrl = "http://192.168.4.1/addwifi";
+        // Attempt to send the network configurations
+        try {
+            setCameraConnecting(true);
 
-                // Send the configurations using an HTTPS POST request
-                const response = await fetch(cameraUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `ssid=${encodeURIComponent(
-                        networkName
-                    )}&password=${encodeURIComponent(
-                        networkPwd
-                    )}&account=${encodeURIComponent(user.uid)}`,
-                });
+            const cameraUrl = "http://192.168.4.1/addwifi";
 
-                setCameraConnecting(false);
-                if (response.ok) {
-                    Alert.alert(
-                        "Success",
-                        "Credentials are sent to your device!"
-                    );
-                    router.push("/result");
-                } else {
-                    throw new Error(
-                        `${response.status} - ${response.statusText}`
-                    );
-                }
-            } catch (error) {
-                setCameraConnecting(false);
-                console.error("Failed to send credentials.", error);
-                Alert.alert(
-                    "Error",
-                    `Could not send credentials to your device. ${error.message}`
-                );
-            }
-        } else {
+            // Send the configurations using an HTTPS POST request
+            const response = await fetch(cameraUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `ssid=${encodeURIComponent(
+                    networkName
+                )}&password=${encodeURIComponent(
+                    networkPwd
+                )}&account=${encodeURIComponent(user.uid)}`,
+            });
+
             setCameraConnecting(false);
-            console.log("Cannot connect");
+            setDeviceConnected(true);
+            if (response.ok) {
+                Alert.alert("Success", "Credentials are sent to your device!");
+                router.push("/result");
+            } else {
+                const message = await response.text();
+                throw new Error(`${response.status} - ${message}`);
+            }
+        } catch (error) {
+            setCameraConnecting(false);
+            console.error("Failed to send credentials.", error);
             Alert.alert(
                 "Error",
-                "You must first connect to the device's network!"
+                `Could not send credentials to your device. ${error.message}`
             );
         }
     };
@@ -352,7 +387,7 @@ const HomeScreen = () => {
                                     onPress={submitLanguagePreference}
                                 >
                                     <Text className="text-white font-bold">
-                                        {step1Done ? "Update" : "Save"}
+                                        {langPrefDone ? "Update" : "Save"}
                                     </Text>
                                 </TouchableOpacity>
                             )}

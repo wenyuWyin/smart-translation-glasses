@@ -2,10 +2,14 @@ import { Tabs } from "expo-router";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
 import { SetupProvider } from "../contexts/setupContext";
+import ESP32WebSocket from "../websocket/esp32WebSocket";
 
 export default function TabLayout() {
     return (
         <SetupProvider>
+            {/* Keep WebSocket module running in the background */}
+            <ESP32WebSocket />
+            
             <Tabs
                 screenOptions={{
                     tabBarActiveTintColor: "#172554",

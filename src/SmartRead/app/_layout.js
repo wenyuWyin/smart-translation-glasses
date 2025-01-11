@@ -1,4 +1,4 @@
-import { Stack, Tabs } from "expo-router";
+import { Stack } from "expo-router";
 import { UserProvider } from "./contexts/userContext";
 
 import "./global.css";
