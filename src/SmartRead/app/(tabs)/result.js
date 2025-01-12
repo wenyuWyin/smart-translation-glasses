@@ -58,7 +58,7 @@ const ResultScreen = () => {
     return (
         <View className="flex-1 bg-blue-100 h-[100%] items-center justify-center">
             {/* Status bar for device temperature, remaining battery, and internet connection status */}
-            <View className="absolute top-0 bg-blue-900 h-[8%] w-full flex-row items-center justify-between px-[2%]">
+            <View className="absolute top-0 bg-blue-900 h-[8%] w-full flex-row items-center justify-between px-[4%]">
                 {/* Device temperature and battery */}
                 {appConnected && deviceConnected && (
                     <View className="flex-row">

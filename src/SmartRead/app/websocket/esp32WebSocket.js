@@ -1,7 +1,10 @@
 import { useEffect, useContext, useRef } from "react";
 import { SetupContext } from "../contexts/setupContext";
 
-import { WEB_SOCKET_ADDRESS } from "@env";
+import io from "socket.io-client";
+
+import { SERVER_IP_ADDRESS } from "@env";
+import { UserContext } from "../contexts/userContext";
 
 const ESP32WebSocket = () => {
     const {
@@ -16,19 +19,10 @@ const ESP32WebSocket = () => {
         battery,
         setBattery,
     } = useContext(SetupContext);
+    const { user, login, logout } = useContext(UserContext);
 
     // Use a ref to store the WebSocket instance and heartbeat timeout
-    const wsRef = useRef(null);
-    const heartbeatTimeoutRef = useRef(null);
-
-    const startHeartbeatTimeout = () => {
-        clearTimeout(heartbeatTimeoutRef.current); // Clear any existing timeout
-        heartbeatTimeoutRef.current = setTimeout(() => {
-            console.log(`disconnected at -> ${Math.floor(Date.now() / 1000)}`);
-            console.log("Heartbeat not received. Assuming ESP32 disconnected.");
-            setDeviceConnected(false); // Mark device as disconnected
-        }, 8000); // Timeout after 8 seconds
-    };
+    const socketRef = useRef(null);
 
     useEffect(() => {
         // Create a new WebSocket connection when both this app and ESP 32 is connected to internet
@@ -36,53 +30,50 @@ const ESP32WebSocket = () => {
             return;
         }
         console.log("Attempting to connect WebSocket...");
-        const ws = new WebSocket(WEB_SOCKET_ADDRESS);
-        wsRef.current = ws;
+        const socket = io(SERVER_IP_ADDRESS);
+        socketRef.current = socket;
 
-        ws.onopen = () => {
+        socket.on("connect", () => {
             console.log("Websocket connected.");
-        };
+
+            // Send a registration message after connecting to the WebSocket
+            const registrationMessage = {
+                event: "register_user",
+                user_id: user.user_id,
+            };
+            socket.emit("register_user", registrationMessage);
+
+            // Define handlers for registration status
+            socket.on("registration_success", (data) => {
+                console.log("Registration successful:", data);
+            });
+
+            socket.on("registration_error", (error) => {
+                console.error("Registration error:", error);
+            });
+        });
 
         // Event handler when a WebSocket message arrives
-        ws.onmessage = (e) => {
+        socket.on("status_update", (data) => {
             try {
-                const message = JSON.parse(e.data);
+                console.log("Message received from ESP32", data);
 
-                // Check for heartbeat message
-                if (message["status"] === "alive") {
-                    console.log(
-                        `Heartbeat received at ${Math.floor(
-                            Date.now() / 1000
-                        )}.`
-                    );
-                    startHeartbeatTimeout(); // Reset the timeout on heartbeat
-                    return;
-                }
-
-                setTemp(message["temperature"]);
-                setDeviceConnected(message["wifiStatus"] === "Connected");
-                setBattery(message["battery"]);
-                console.log("Message received from ESP32", message);
+                setTemp(data.temperature);
+                setDeviceConnected(data.wifiStatus === "Connected");
+                setBattery(data.battery);
             } catch (error) {
                 console.error("Erroor parsing WebSocket message: ", error);
             }
-        };
+        });
 
-        // Assuming the device's network is disconnected when an error occurs or the WebSocket is closed
-        ws.onerror = (error) => {
+        socket.on("esp32_disconnect", () => {
             setDeviceConnected(false);
-            console.error("WebSocket error: ", error.message);
-        };
-
-        ws.onclose = () => {
-            setDeviceConnected(false);
-            console.log("WebSocket connection closed.");
-        };
+            console.log("WebSocket disconnected");
+        });
 
         return () => {
-            clearTimeout(heartbeatTimeoutRef.current); // Clear heartbeat timeout on cleanup
-            if (wsRef.current) {
-                wsRef.current.close();
+            if (socketRef.current) {
+                socketRef.current.disconnect();
             }
         };
     }, [deviceConnected, appConnected]);

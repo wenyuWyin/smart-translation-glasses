@@ -24,6 +24,7 @@ import auth from "@react-native-firebase/auth";
 import styles from "../styles/styles";
 import TopRightButton from "../components/topRightButton";
 import { SetupContext } from "../contexts/setupContext";
+import { UserContext } from "../contexts/userContext";
 
 const HomeScreen = () => {
     console.log("Home Page Rendered");
@@ -42,9 +43,7 @@ const HomeScreen = () => {
         battery,
         setBattery,
     } = useContext(SetupContext);
-
-    // Initialize a user
-    const [user, setUser] = useState();
+    const { user, login, logout } = useContext(UserContext);
 
     const onAuthStateChanged = (user) => {
         if (!user) {
@@ -54,7 +53,7 @@ const HomeScreen = () => {
             );
         } else {
             console.log(`Got user from db - ${user.uid}`);
-            setUser(user);
+            login(user.uid);
         }
     };
 
@@ -71,7 +70,7 @@ const HomeScreen = () => {
                 try {
                     setLangLoading(true);
                     const response = await fetch(
-                        SERVER_IP_ADDRESS + `/lang-pref?uid=${user.uid}`,
+                        SERVER_IP_ADDRESS + `/lang-pref?uid=${user.user_id}`,
                         {
                             method: "GET",
                         }
@@ -186,7 +185,7 @@ const HomeScreen = () => {
         }
 
         try {
-            // Store language preferences in the database 
+            // Store language preferences in the database
             setLangLoading(true);
             const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
                 method: "POST",
@@ -194,7 +193,7 @@ const HomeScreen = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    uid: user.uid,
+                    uid: user.user_id,
                     sourceLang: languageOptions[sourceLang - 1].label,
                     targetLang: languageOptions[targetLang - 1].label,
                 }),
@@ -249,7 +248,7 @@ const HomeScreen = () => {
                     networkName
                 )}&password=${encodeURIComponent(
                     networkPwd
-                )}&account=${encodeURIComponent(user.uid)}`,
+                )}&account=${encodeURIComponent(user.user_id)}`,
             });
 
             setCameraConnecting(false);
@@ -288,6 +287,7 @@ const HomeScreen = () => {
                             <MaterialCommunityIcon name="menu" size={30} />
                         }
                         onPress={() => {
+                            logout();
                             router.replace("/login");
                         }}
                     />

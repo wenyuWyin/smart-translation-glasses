@@ -3,3 +3,4 @@ firebase_admin
 gunicorn
 python-dotenv
 google-cloud-translate==2.0.1
+flask-socketio

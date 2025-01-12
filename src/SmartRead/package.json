@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-community/netinfo": "11.4.1",
     "@react-native-firebase/app": "^21.6.2",
     "@react-native-firebase/auth": "^21.6.2",
     "expo": "~52.0.23",
@@ -28,7 +29,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
     "react-native-wifi-reborn": "^4.13.1",
-    "@react-native-community/netinfo": "11.4.1"
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

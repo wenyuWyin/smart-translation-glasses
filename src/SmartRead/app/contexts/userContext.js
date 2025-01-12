@@ -1,15 +1,15 @@
 import React, { createContext, useState, useContext } from "react";
 
 // Create user context to hold user data and authentication methods
-const UserContext = createContext();
+export const UserContext = createContext();
 
 // Provide the user context to components within app
 export const UserProvider = ({ children }) => {
     // store user information
     const [user, setUser] = useState(null);
 
-    const login = (username) => {
-        setUser({ name: username });
+    const login = (id) => {
+        setUser({ user_id: id });
     };
 
     const logout = () => {
