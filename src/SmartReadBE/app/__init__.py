@@ -8,7 +8,15 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from flask_socketio import SocketIO
 
+from .TaskManager import TaskManager
+from TextExtractionModule.TextExtractionManager import TextExtractionManager
+from TranslationModule.TranslationManager import TranslationManager
+
 load_dotenv()
+
+# Suppress logging warnings
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+os.environ["GLOG_minloglevel"] = "2"
 
 
 # Initialize Firebase Admin
@@ -25,6 +33,10 @@ def initialize_firebase():
 
 
 db = initialize_firebase()
+
+task_manager = TaskManager()
+extraction_manager = TextExtractionManager()
+translation_manager = TranslationManager()
 
 # Initialize Flask app and SocketIO
 socketio = SocketIO(cors_allowed_origins="*")
@@ -59,8 +71,15 @@ def create_app():
     # Initialize socket IO
     socketio.init_app(app)
 
+    print("Initializing managers")
+    task_manager.initialize()
+    extraction_manager.initialize()
+    translation_manager.initialize()
+    print("Managers initialized")
+
     # Monitor heartbeat signals of each device on a separate thread
     Thread(target=monitor_heartbeats, daemon=True).start()
+    Thread(target=run_task_manager, daemon=True).start()
 
     return app
 
@@ -83,3 +102,21 @@ def monitor_heartbeats():
             del device_heartbeats[user_id]
             print(f"User {user_id} is disconnected due to timeout")
             notify_disconnection(user_id)
+
+
+def run_task_manager():
+    task_manager.activate_queue()
+    while True:
+        if task_manager.task_queue:
+            print(f"{len(task_manager.task_queue)} tasks left in the queue")
+            task = task_manager.task_queue[0]
+            if task.get_status():
+                print(f"Exceuting Task {task.task_id}")
+                success = task.execute_task()
+                if success:
+                    print(f"Task {task.task_id} executed successfully")
+                    task_manager.remove_task(task.task_id)
+                else:
+                    print(f"Task {task.task_id} failed")
+            else:
+                print(f"Task {task.task_id} is not active")

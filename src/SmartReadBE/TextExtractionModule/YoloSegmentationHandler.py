@@ -3,24 +3,34 @@ Image segmentation using YOLO-based models
 """
 
 import random
+import os
 from typing import Dict
 import cv2
+import numpy as np
 from ultralytics import YOLO
-from IImageSegmentationHandler import IImageSegmentationHandler
+from .IImageSegmentationHandler import IImageSegmentationHandler
 
-MODEL_PATH = "capstone_yolov8_trained.pt"
+# Get the current folder's absolute path
+current_folder = os.path.dirname(os.path.abspath(__file__))
+
+# Append the model file name to the current folder's path
+MODEL_PATH = os.path.join(current_folder, "capstone_yolov8_trained.pt")
 
 
 class YoloSegmentationHandler(IImageSegmentationHandler):
     def __init__(self):
-        self.model = YOLO(MODEL_PATH)
-
+        self.model = YOLO(MODEL_PATH, verbose=True)
         self.handlerID = f"YS{random.randint(100, 999)}"
         self.segmentationStatus = False
         self.result = ""
 
+        # Warm-up model during initialization to allocate resource to YOLO models in advance
+        dummy_image = np.zeros((640, 640, 3), dtype=np.uint8)
+        self.model(dummy_image)
+
     def imageSegmentation(self, image: cv2.Mat) -> Dict[tuple, cv2.Mat]:
         try:
+            print("Image segmentation started")
             # Segment the image into sub-images
             results = self.model(image)
             result = results[0]
@@ -33,7 +43,8 @@ class YoloSegmentationHandler(IImageSegmentationHandler):
                 self.result[(x1, x2, y1, y2)] = sub_image
 
             self.segmentationStatus = True
-        except Exception:
+        except Exception as e:
+            print(f"Image segmentation failed with {e}")
             self.result = []
             self.segmentationStatus = False
 

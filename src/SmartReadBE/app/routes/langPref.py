@@ -4,6 +4,16 @@ from .. import db
 lang_pref_bp = Blueprint("lang_pref", __name__)
 
 
+def fetch_language_preference(uid: str):
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return jsonify({"error": "User not found"}), 404
+
+    user_data = user_doc.to_dict()
+
+    return user_data
+
+
 @lang_pref_bp.route("/lang-pref", methods=["POST", "GET"])
 def save_language_preference():
     if request.method == "POST":
@@ -11,7 +21,6 @@ def save_language_preference():
         uid = data.get("uid")
         source_lang = data.get("sourceLang")
         target_lang = data.get("targetLang")
-        print(f'{uid} - {source_lang} - {target_lang}')
 
         if not uid or not source_lang or not target_lang:
             return jsonify({"error": "Missing required fields"}), 400
@@ -34,11 +43,8 @@ def save_language_preference():
             return jsonify({"error": "UID is required"}), 400
 
         try:
-            user_doc = db.collection("users").document(uid).get()
-            if not user_doc.exists:
-                return jsonify({"error": "User not found"}), 404
+            user_data = fetch_language_preference(uid)
 
-            user_data = user_doc.to_dict()
             return jsonify(
                 {
                     "source-lang": user_data["source-lang"],

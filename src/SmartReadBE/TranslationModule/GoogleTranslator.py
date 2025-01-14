@@ -3,29 +3,45 @@ Translation by Google Cloud Translate API
 """
 
 from google.cloud import translate_v2 as translate
-from ITranslationHandler import ITranslationHandler
 import random
+from .ITranslationHandler import ITranslationHandler
 import os
+
+# Get the current folder's absolute path
+current_folder = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(current_folder, "application_default_credentials.json")
+
+# Define environment variable for the configuration file
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CONFIG_PATH
+
 
 class GoogleTranslator(ITranslationHandler):
     def __init__(self):
         # Load API key
-        # To be modified   
+        # To be modified
         # Create a Translate client with the API key
         self.client = translate.Client()
         self.handlerID = f"TG{random.randint(100, 999)}"
         self.transStatus = False
         self.result = ""
 
-    def translate(self, inputTxt: str, targetLanguage: str, sourceLanguage: str = None) -> str:
+    def translate(
+        self, inputTxt: str, targetLanguage: str, sourceLanguage: str = None
+    ) -> str:
         # Translates the input text into the target language.
         try:
             if sourceLanguage:
                 # Translation with specified source language
-                response = self.client.translate(inputTxt, target_language=targetLanguage, source_language=sourceLanguage)
+                response = self.client.translate(
+                    inputTxt,
+                    target_language=targetLanguage,
+                    source_language=sourceLanguage,
+                )
             else:
                 # Translation with auto-detected source language
-                response = self.client.translate(inputTxt, target_language=targetLanguage)
+                response = self.client.translate(
+                    inputTxt, target_language=targetLanguage
+                )
 
             self.result = response["translatedText"]
             self.transStatus = True
@@ -42,8 +58,7 @@ class GoogleTranslator(ITranslationHandler):
     def getResult(self) -> str:
         # Retrieves the translation result.
         return self.result
-    
+
     def getID(self) -> int:
         # Retrieves unique identifier for this handler
         return self.handlerID
-
