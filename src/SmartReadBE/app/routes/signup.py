@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app import db
+from app.Config import db
 
 signup_bp = Blueprint('signup', __name__)
 

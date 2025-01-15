@@ -25,7 +25,6 @@ class TaskManager:
                 len(self.task_queue) == 0
             )  # whether has tasks in the queue
 
-            self.status = False  # queue running status
             self.initialized = False
 
     def initialize(self) -> bool:
@@ -66,7 +65,6 @@ class TaskManager:
 
     def activate_queue(self) -> None:
         print("Executing tasks in the queue...")
-        self.status = True
 
     def get_all_task_id(self) -> list[int]:
         return self.task_ids

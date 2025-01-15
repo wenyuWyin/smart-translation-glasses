@@ -1,9 +1,13 @@
-from flask_socketio import emit
+from flask_socketio import SocketIO, emit
 from flask import request
-from app import socketio
+
+from .TaskState import TaskState
 
 # Dictionary to map user_id to WebSocket session ID
 user_sessions = {}
+
+# Initialize Flask app and SocketIO
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 @socketio.on("connect")
@@ -21,6 +25,7 @@ def register_user(data):
         user_sessions[user_id] = request.sid
         print(f"User {user_id} registered with session ID {request.sid}")
         emit("registration_success", {"message": "User registered successfully"})
+        emit("image_progress_update", {"state": TaskState.IDLE.value})
     else:
         emit("registration_error", {"error": "User ID is required"})
 
@@ -69,5 +74,19 @@ def send_status_update(user_id, battery, temperature, connection_status):
         }
         print(f"Sending status update to user {user_id}: {data}")
         socketio.emit("status_update", data, to=target_sid)
+    else:
+        print(f"User {user_id} is not registered")
+
+
+def send_image_process_status(user_id, state, data=None):
+    """
+    Notofy the correct front-end app about the progress of image processing
+    """
+    target_sid = user_sessions.get(user_id)
+    if target_sid:
+        if not data:
+            data = {"event": "image_progress_update", "state": state.value}
+        print(f"Sending image progress update to user {user_id}")
+        socketio.emit("image_progress_update", data, to=target_sid)
     else:
         print(f"User {user_id} is not registered")

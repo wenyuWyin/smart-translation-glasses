@@ -1,9 +1,9 @@
 import time
 from flask import Blueprint, request, jsonify
-from app import device_heartbeats
-from app.webSocketHandler import send_status_update
+from app.Config import device_heartbeats
+from app.WebSocketHandler import send_status_update
 from app.Task import Task
-from app import task_manager, extraction_manager, translation_manager
+from app.Config import task_manager, extraction_manager, translation_manager
 from .langPref import fetch_language_preference
 import os
 import cv2
@@ -42,6 +42,7 @@ def upload_image():
         target_lang = user_data["target-lang"]
 
         task = Task(
+            account_number,
             len(task_manager.task_queue) + 1,
             extraction_manager,
             image,

@@ -1,11 +1,13 @@
 import React, { useContext } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Image } from "react-native";
 
 import Ionicon from "react-native-vector-icons/Ionicons";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome6";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import { SetupContext } from "../contexts/setupContext";
+import { TranslationContext } from "../contexts/translationContext";
+import convertStateToMessage from "../services/imageProcessState";
 
 const ResultScreen = () => {
     console.log("Result Page Rendered");
@@ -24,6 +26,14 @@ const ResultScreen = () => {
         battery,
         setBattery,
     } = useContext(SetupContext);
+    const {
+        trnStateCode,
+        setTrnStateCode,
+        trnImage,
+        setTrnImage,
+        trnResult,
+        setTrnResult,
+    } = useContext(TranslationContext);
 
     // Convert a temperature string to an icon name
     const convertToTemperatureIcon = (input) => {
@@ -153,6 +163,16 @@ const ResultScreen = () => {
                             Connect your phone to an available network
                         </Text>
                     </View>
+                </View>
+            )}
+
+            {/* Translation Result Display */}
+            {langPrefDone && deviceConnected && appConnected && (
+                <View className="flex-row items-center w-full px-6">
+                    {trnImage && <Image source={{ uri: trnImage }} className="w-[100] h-[100]" />} 
+                    <Text className="text-lg">
+                        {convertStateToMessage(trnStateCode)}
+                    </Text>
                 </View>
             )}
         </View>

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from .. import db
+from ..Config import db
 
 lang_pref_bp = Blueprint("lang_pref", __name__)
 

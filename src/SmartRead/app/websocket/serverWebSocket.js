@@ -1,12 +1,14 @@
 import { useEffect, useContext, useRef } from "react";
-import { SetupContext } from "../contexts/setupContext";
 
 import io from "socket.io-client";
+import * as FileSystem from "expo-file-system";
 
 import { SERVER_IP_ADDRESS } from "@env";
 import { UserContext } from "../contexts/userContext";
+import { SetupContext } from "../contexts/setupContext";
+import { TranslationContext } from "../contexts/translationContext";
 
-const ESP32WebSocket = () => {
+const ServerWebSocket = () => {
     const {
         langPrefDone,
         setLangPrefDone,
@@ -20,6 +22,14 @@ const ESP32WebSocket = () => {
         setBattery,
     } = useContext(SetupContext);
     const { user, login, logout } = useContext(UserContext);
+    const {
+        trnStateCode,
+        setTrnStateCode,
+        trnImage,
+        setTrnImage,
+        trnResult,
+        setTrnResult,
+    } = useContext(TranslationContext);
 
     // Use a ref to store the WebSocket instance and heartbeat timeout
     const socketRef = useRef(null);
@@ -53,16 +63,33 @@ const ESP32WebSocket = () => {
             });
         });
 
-        // Event handler when a WebSocket message arrives
+        // Event handler when a WebSocket status update message arrives
         socket.on("status_update", (data) => {
             try {
-                console.log("Message received from ESP32", data);
+                console.log("Message received from server", data);
 
                 setTemp(data.temperature);
                 setDeviceConnected(data.wifiStatus === "Connected");
                 setBattery(data.battery);
             } catch (error) {
-                console.error("Erroor parsing WebSocket message: ", error);
+                console.error("Error parsing WebSocket message: ", error);
+            }
+        });
+
+        // Event handler when a WebSocket image progress update message arrives
+        socket.on("image_progress_update", async (data) => {
+            try {
+                console.log("Message received from server", data);
+
+                setTrnStateCode(data.state);
+                if (data.image) {
+                    setTrnImage(`data:image/jpeg;base64,${data.image}`);
+                }
+                if (data.result) {
+                    setTrnResult(data.result);
+                }
+            } catch (error) {
+                console.error("Error parsing WebSocket message: ", error);
             }
         });
 
@@ -79,4 +106,4 @@ const ESP32WebSocket = () => {
     }, [deviceConnected, appConnected]);
 };
 
-export default ESP32WebSocket;
+export default ServerWebSocket;
