@@ -100,8 +100,8 @@ class Task:
             print(f"Translation completed. Translated text: {translated_text}")
 
         # Save results to Firebase storage and database
-        storage_image_url = save_image(self.user_id)
-        self.results[storage_image_url] = results
+        storage_image_id = save_image(self.user_id)
+        self.results[str(storage_image_id)] = results
         self.save_task_result()
 
         print("Task results saved to Firebase")
@@ -137,7 +137,7 @@ class Task:
         }
         try:
             user_ref = db.collection("users").document(self.user_id)
-            user_ref.update({"history": serialized_data})
+            user_ref.set({"history": serialized_data}, merge=True)
             print(f"Data successfully stored for user: {self.user_id}")
 
             return True
@@ -166,7 +166,7 @@ def save_image(user_id: int):
 
         print(f"File uploaded successfully. Public URL: {blob.public_url}")
 
-        return blob.public_url
+        return image_id
     except Exception as e:
         print(f"An error occurred: {e}")
 

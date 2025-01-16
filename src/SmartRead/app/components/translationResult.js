@@ -1,0 +1,1 @@
+// TODO: Create a component to display translation results

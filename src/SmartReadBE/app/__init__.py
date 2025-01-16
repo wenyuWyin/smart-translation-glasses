@@ -14,9 +14,6 @@ os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "2"
 
 
-
-
-
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.getenv("SECRET_KEY")
@@ -35,11 +32,13 @@ def create_app():
     from .routes.signup import signup_bp
     from .routes.home import home_bp
     from .routes.langPref import lang_pref_bp
+    from .routes.history import history_bp
 
     app.register_blueprint(upload_bp)
     app.register_blueprint(signup_bp)
     app.register_blueprint(home_bp)
     app.register_blueprint(lang_pref_bp)
+    app.register_blueprint(history_bp)
 
     # Initialize socket IO
     socketio.init_app(app)
