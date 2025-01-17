@@ -64,6 +64,7 @@ export default function TabLayout() {
                                         color={color}
                                     />
                                 ),
+                                gestureEnabled: false
                             }}
                         />
                     </Tabs>
