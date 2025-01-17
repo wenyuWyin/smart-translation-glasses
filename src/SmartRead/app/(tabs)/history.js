@@ -1,6 +1,13 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import {
+    View,
+    Text,
+    FlatList,
+    ActivityIndicator,
+    TouchableOpacity,
+} from "react-native";
 
+import TranslationResultModal from "../components/translationResultModal";
 import fetchTranslationHistory from "../services/historyService";
 import { UserContext } from "../contexts/userContext";
 
@@ -9,6 +16,8 @@ const HistoryScreen = () => {
 
     const { user, login, logout } = useContext(UserContext);
 
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [history, setHistory] = useState([]);
 
@@ -55,27 +64,39 @@ const HistoryScreen = () => {
             minute: "2-digit",
         };
 
-		return date.toLocaleString("en-US", options); 
+        return date.toLocaleString("en-US", options);
     };
 
     const renderItem = ({ item }) => {
         const { orgTextPreview, trnTextPreview } = getPreview(item.result);
 
         return (
-            <View className="border-b border-gray-300 p-4">
-                <Text className="font-bold text-lg">
-                    {formatDateString(item.translate_time)}
-                </Text>
+            <TouchableOpacity onPress={() => openModal(item)}>
+                <View className="border-b border-gray-300 p-4">
+                    <Text className="font-bold text-lg">
+                        {formatDateString(item.translate_time)}
+                    </Text>
 
-                <Text className="mt-2 text-gray-500">
-                    Original: {orgTextPreview}...
-                </Text>
+                    <Text className="mt-2 text-gray-500">
+                        Original: {orgTextPreview}...
+                    </Text>
 
-                <Text className="mt-1 text-blue-950">
-                    Translated: {trnTextPreview}...
-                </Text>
-            </View>
+                    <Text className="mt-1 text-blue-950">
+                        Translated: {trnTextPreview}...
+                    </Text>
+                </View>
+            </TouchableOpacity>
         );
+    };
+
+    const openModal = (item) => {
+        setSelectedItem(item);
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+        setSelectedItem(null);
     };
 
     return loadingHistory ? (
@@ -86,12 +107,22 @@ const HistoryScreen = () => {
             <ActivityIndicator size="large" color="#ffffff" />
         </View>
     ) : (
-        <FlatList
-            data={history}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={renderItem}
-            className="p-4 bg-blue-100"
-        />
+        <View className="flex-1 justify-center items-center bg-blue-100 px-4">
+            {selectedItem && (
+                <TranslationResultModal
+                    imageUri={selectedItem.image}
+                    result={selectedItem.result}
+                    modalVisible={modalVisible}
+                    closeModal={closeModal}
+                />
+            )}
+            <FlatList
+                data={history}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={renderItem}
+                className="p-4 bg-blue-100"
+            />
+        </View>
     );
 };
 

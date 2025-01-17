@@ -9,7 +9,6 @@ export default fetchTranslationHistory = async (uid) => {
             }
         );
         const data = await response.json();
-        console.log(data)
         const history = data.data;
 
         return history;
