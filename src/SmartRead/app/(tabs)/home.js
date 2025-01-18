@@ -37,7 +37,7 @@ const HomeScreen = () => {
         deviceConnected,
         setDeviceConnected,
         appConnected,
-        SetAppConnected,
+        setAppConnected,
         temp,
         setTemp,
         battery,
@@ -123,9 +123,9 @@ const HomeScreen = () => {
 
                         if (currentSSID !== "ESP32_CAM_AP") {
                             console.log("User connected to a local network!");
-                            SetAppConnected(true);
+                            setAppConnected(true);
                         } else {
-                            SetAppConnected(false);
+                            setAppConnected(false);
                         }
                     } catch (error) {
                         console.error("Error getting SSID:", error);
@@ -136,6 +136,7 @@ const HomeScreen = () => {
 
         return () => unsubscribe();
     }, []);
+
 
     // Language preference settings
     const [langLoading, setLangLoading] = useState(false);

@@ -57,11 +57,16 @@ const TranslationResult = ({ imageUri, result }) => {
     const doubleTapGesture = Gesture.Tap()
         .numberOfTaps(2)
         .onEnd(() => {
+            console.log("double tap deteced");
             // Use withSpring for a spring animation
             if (scale.value === 1) {
                 scale.value = withSpring(2); // Enlarge image
             } else {
                 scale.value = withSpring(1); // Shrink back to normal
+                translateBeginX.value = 0; // Reset translations
+                translateBeginY.value = 0;
+                translateX.value = 0;
+                translateY.value = 0;
             }
         });
 
@@ -114,7 +119,7 @@ const TranslationResult = ({ imageUri, result }) => {
                     singleTapGesture
                 )}
             >
-                <View className="flex-1 justify-center items-center ">
+                <View className="flex-1 justify-center items-center">
                     <Animated.View
                         style={[
                             animatedStyle,

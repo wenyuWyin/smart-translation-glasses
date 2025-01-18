@@ -6,7 +6,7 @@ export const SetupContext = createContext();
 export const SetupProvider = ({ children }) => {
     const [langPrefDone, setLangPrefDone] = useState(false);
     const [deviceConnected, setDeviceConnected] = useState(false);
-    const [appConnected, SetAppConnected] = useState(true);
+    const [appConnected, setAppConnected] = useState(false);
     const [temp, setTemp] = useState("");
     const [battery, setBattery] = useState("");
 
@@ -18,7 +18,7 @@ export const SetupProvider = ({ children }) => {
                 deviceConnected,
                 setDeviceConnected,
                 appConnected,
-                SetAppConnected,
+                setAppConnected,
                 temp,
                 setTemp,
                 battery,

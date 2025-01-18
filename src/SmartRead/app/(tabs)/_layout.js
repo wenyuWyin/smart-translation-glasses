@@ -50,6 +50,7 @@ export default function TabLayout() {
                                         color={color}
                                     />
                                 ),
+                                gestureEnabled: false,
                             }}
                         />
                         <Tabs.Screen
@@ -64,7 +65,7 @@ export default function TabLayout() {
                                         color={color}
                                     />
                                 ),
-                                gestureEnabled: false
+                                gestureEnabled: false,
                             }}
                         />
                     </Tabs>

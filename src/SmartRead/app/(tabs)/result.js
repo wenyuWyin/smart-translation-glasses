@@ -1,13 +1,18 @@
-import React, { useContext } from "react";
-import { View, Text, Image } from "react-native";
+import React, { useState, useContext } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 
 import Ionicon from "react-native-vector-icons/Ionicons";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome6";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import {
+    GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 import { SetupContext } from "../contexts/setupContext";
 import { TranslationContext } from "../contexts/translationContext";
 import convertStateToMessage from "../services/imageProcessState";
+import TranslationResult from "../components/translationResult";
+import TranslationHelpModal from "../components/translationHelpModal";
 
 const ResultScreen = () => {
     console.log("Result Page Rendered");
@@ -20,7 +25,7 @@ const ResultScreen = () => {
         deviceConnected,
         setDeviceConnected,
         appConnected,
-        SetAppConnected,
+        setAppConnected,
         temp,
         setTemp,
         battery,
@@ -34,6 +39,8 @@ const ResultScreen = () => {
         trnResult,
         setTrnResult,
     } = useContext(TranslationContext);
+
+    const [showHelp, setShowHelp] = useState(false);
 
     // Convert a temperature string to an icon name
     const convertToTemperatureIcon = (input) => {
@@ -168,13 +175,49 @@ const ResultScreen = () => {
 
             {/* Translation Result Display */}
             {langPrefDone && deviceConnected && appConnected && (
-                <View className="flex-row items-center w-full px-6">
-                    {trnImage && <Image source={{ uri: trnImage }} className="w-[100] h-[100]" />} 
-                    <Text className="text-lg">
-                        {convertStateToMessage(trnStateCode)}
-                    </Text>
+                <View className="flex-1 justify-center items-center h-[80%]">
+                    <View className="absolute flex-row px-6 mt-2 top-12">
+                        <Text className="text-lg font-bold">
+                            {convertStateToMessage(trnStateCode)}
+                        </Text>
+                    </View>
+                    {trnImage && (
+                        <View className="flex-col w-[95%] h-[29%] rounded-xl">
+                            <TranslationResult
+                                imageUri={trnImage}
+                                result={trnResult || {}}
+                            />
+                        </View>
+                    )}
                 </View>
             )}
+
+            {/* Help Icon */}
+            {langPrefDone && deviceConnected && appConnected && (
+                <TouchableOpacity
+                    onPress={() => {
+                        console.log("pressed");
+                        setShowHelp(true);
+                    }}
+                    className="absolute bottom-5 right-3 flex-row items-center"
+                >
+                    <View className="flex-row items-center mx-4">
+                        <MaterialCommunityIcon
+                            name="help-circle"
+                            size={22}
+                            className="mr-2"
+                        />
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            {/* Add the gesture handler root view such that the modal can work with TranslationResult's gesture detection */}
+            <GestureHandlerRootView style={{ width: "1%", height: "1%" }}>
+                <TranslationHelpModal
+                    visible={showHelp}
+                    onClose={() => setShowHelp(false)}
+                />
+            </GestureHandlerRootView>
         </View>
     );
 };

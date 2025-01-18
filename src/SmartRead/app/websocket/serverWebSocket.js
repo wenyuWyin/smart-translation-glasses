@@ -15,7 +15,7 @@ const ServerWebSocket = () => {
         deviceConnected,
         setDeviceConnected,
         appConnected,
-        SetAppConnected,
+        setAppConnected,
         temp,
         setTemp,
         battery,
@@ -36,7 +36,7 @@ const ServerWebSocket = () => {
 
     useEffect(() => {
         // Create a new WebSocket connection when both this app and ESP 32 is connected to internet
-        if (!(appConnected && deviceConnected)) {
+        if (!appConnected) {
             return;
         }
         console.log("Attempting to connect WebSocket...");
@@ -83,7 +83,7 @@ const ServerWebSocket = () => {
 
                 setTrnStateCode(data.state);
                 if (data.image) {
-                    setTrnImage(`data:image/jpeg;base64,${data.image}`);
+                    setTrnImage(data.image);
                 }
                 if (data.result) {
                     setTrnResult(data.result);
@@ -103,7 +103,7 @@ const ServerWebSocket = () => {
                 socketRef.current.disconnect();
             }
         };
-    }, [deviceConnected, appConnected]);
+    }, [appConnected]);
 };
 
 export default ServerWebSocket;
