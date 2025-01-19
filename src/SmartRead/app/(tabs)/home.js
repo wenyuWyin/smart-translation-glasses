@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
-import { SERVER_IP_ADDRESS } from "@env";
 import { Dropdown } from "react-native-element-dropdown";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -70,7 +69,8 @@ const HomeScreen = () => {
                 try {
                     setLangLoading(true);
                     const response = await fetch(
-                        SERVER_IP_ADDRESS + `/lang-pref?uid=${user.user_id}`,
+                        process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS +
+                            `/lang-pref?uid=${user.user_id}`,
                         {
                             method: "GET",
                         }
@@ -137,7 +137,6 @@ const HomeScreen = () => {
         return () => unsubscribe();
     }, []);
 
-
     // Language preference settings
     const [langLoading, setLangLoading] = useState(false);
     const [sourceLang, setSourceLang] = useState(null);
@@ -188,17 +187,20 @@ const HomeScreen = () => {
         try {
             // Store language preferences in the database
             setLangLoading(true);
-            const response = await fetch(SERVER_IP_ADDRESS + "/lang-pref", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    uid: user.user_id,
-                    sourceLang: languageOptions[sourceLang - 1].label,
-                    targetLang: languageOptions[targetLang - 1].label,
-                }),
-            });
+            const response = await fetch(
+                process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS + "/lang-pref",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        uid: user.user_id,
+                        sourceLang: languageOptions[sourceLang - 1].label,
+                        targetLang: languageOptions[targetLang - 1].label,
+                    }),
+                }
+            );
 
             setLangLoading(false);
             setLangPrefDone(true);

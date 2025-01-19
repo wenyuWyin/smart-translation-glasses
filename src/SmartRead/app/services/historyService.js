@@ -1,9 +1,7 @@
-import { SERVER_IP_ADDRESS } from "@env";
-
 export default fetchTranslationHistory = async (uid) => {
     try {
         const response = await fetch(
-            SERVER_IP_ADDRESS + `/history?uid=${uid}`,
+            process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS + `/history?uid=${uid}`,
             {
                 method: "GET",
             }
@@ -13,6 +11,6 @@ export default fetchTranslationHistory = async (uid) => {
 
         return history;
     } catch (error) {
-        throw Error(error)
+        throw Error(error);
     }
 };

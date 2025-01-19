@@ -3,7 +3,6 @@ import { useEffect, useContext, useRef } from "react";
 import io from "socket.io-client";
 import * as FileSystem from "expo-file-system";
 
-import { SERVER_IP_ADDRESS } from "@env";
 import { UserContext } from "../contexts/userContext";
 import { SetupContext } from "../contexts/setupContext";
 import { TranslationContext } from "../contexts/translationContext";
@@ -40,7 +39,7 @@ const ServerWebSocket = () => {
             return;
         }
         console.log("Attempting to connect WebSocket...");
-        const socket = io(SERVER_IP_ADDRESS);
+        const socket = io(process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS);
         socketRef.current = socket;
 
         socket.on("connect", () => {
@@ -84,6 +83,7 @@ const ServerWebSocket = () => {
                 setTrnStateCode(data.state);
                 if (data.image) {
                     setTrnImage(data.image);
+                    setTrnResult(null);
                 }
                 if (data.result) {
                     setTrnResult(data.result);
