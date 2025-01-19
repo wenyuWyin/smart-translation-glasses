@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { 
-    Alert, 
-    View, 
-    Text, 
-    TextInput, 
+import {
+    Alert,
+    View,
+    Text,
+    TextInput,
     Platform,
-    KeyboardAvoidingView, 
+    ActivityIndicator,
+    KeyboardAvoidingView,
     ScrollView,
     TouchableOpacity,
 } from "react-native";
@@ -23,6 +24,9 @@ const SignupScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [pwdVisible, setPwdVisible] = useState(true);
+
+    const [signupWait, setSignupWait] = useState(false);
+
     const router = useRouter();
 
     const signupClicked = async () => {
@@ -40,12 +44,16 @@ const SignupScreen = () => {
             return;
         }
 
+        setSignupWait(true);
+
         // Send signup request to backend
         const signupResponse = await handleRegister(username, email, password);
+
+        setSignupWait(false);
         if (!signupResponse.status) {
             Alert.alert("Error", signupResponse.message);
         } else {
-            router.replace("/login");
+            router.replace("/home");
         }
     };
 
@@ -55,6 +63,11 @@ const SignupScreen = () => {
             style={{ flex: 1 }}
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                {signupWait && (
+                    <View className="absolute inset-0 bg-black/50 justify-center items-center z-10">
+                        <ActivityIndicator size="large" color="#ffffff" />
+                    </View>
+                )}
                 <View className="flex-1 justify-center items-center bg-blue-100 p-4">
                     <Text
                         style={{
@@ -119,7 +132,9 @@ const SignupScreen = () => {
                         atBottom={false}
                     />
                     <View className="mt-5 flex-row justify-center">
-                        <Text className="text-gray-700">Already have an account? </Text>
+                        <Text className="text-gray-700">
+                            Already have an account?{" "}
+                        </Text>
                         <Text
                             className="text-blue-500 underline font-bold"
                             onPress={() => router.replace("/login")}
