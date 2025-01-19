@@ -1,7 +1,5 @@
 import auth from "@react-native-firebase/auth";
 
-import { SERVER_IP_ADDRESS } from "@env";
-
 export const handleLogin = async (email, password) => {
     var status = 1;
     var message = "";
@@ -61,16 +59,19 @@ export const handleRegister = async (username, email, password) => {
     // If sign up successful, connect to backend to create a database for the user
     if (uid) {
         try {
-            const response = await fetch(SERVER_IP_ADDRESS + "/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    uid,
-                    username,
-                }),
-            });
+            const response = await fetch(
+                process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS + "/signup",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        uid,
+                        username,
+                    }),
+                }
+            );
 
             if (!response.ok) {
                 status = 0;
@@ -85,5 +86,18 @@ export const handleRegister = async (username, email, password) => {
         }
     }
 
+    if (status) {
+        const loginResponse = await handleLogin(email, password);
+
+        if (loginResponse.status === 1) {
+            console.log("Log in successful using Firebase!");
+        } else {
+            status = 0;
+            message = `Cannot login with the username and email: ${loginResponse.message}`
+            Alert.alert("Error", loginResponse.message);
+        }
+    
+    }
+    
     return { status: status, message: message };
 };
