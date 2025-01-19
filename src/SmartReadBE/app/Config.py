@@ -69,11 +69,15 @@ def run_task_manager():
             task = task_manager.task_queue[0]
             if task.get_status():
                 print(f"Exceuting Task {task.task_id}")
-                success = task.execute_task()
-                if success:
-                    print(f"Task {task.task_id} executed successfully")
-                    task_manager.remove_task(task.task_id)
-                else:
-                    print(f"Task {task.task_id} failed")
+                try:
+                    success = task.execute_task()
+                    if success:
+                        print(f"Task {task.task_id} executed successfully")
+                        task_manager.remove_task(task.task_id)
+                    else:
+                        print(f"Task {task.task_id} failed")
+                        task_manager.remove_task(task.task_id)
+                except Exception as e:
+                    print(f"Executing Task {task.task_id} encounters an error: {e}")
             else:
                 print(f"Task {task.task_id} is not active")

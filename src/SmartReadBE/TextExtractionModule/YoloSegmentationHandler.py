@@ -45,7 +45,7 @@ class YoloSegmentationHandler(IImageSegmentationHandler):
             self.segmentationStatus = True
         except Exception as e:
             print(f"Image segmentation failed with {e}")
-            self.result = []
+            self.result = {}
             self.segmentationStatus = False
 
         return self.result

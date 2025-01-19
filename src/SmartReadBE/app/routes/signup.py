@@ -1,20 +1,21 @@
 from flask import Blueprint, request
 from app.Config import db
 
-signup_bp = Blueprint('signup', __name__)
+signup_bp = Blueprint("signup", __name__)
 
-@signup_bp.route('/signup', methods=['POST'])
+
+@signup_bp.route("/signup", methods=["POST"])
 def signup():
     try:
         data = request.get_json()
-        uid = data.get('uid')
-        username = data.get('username')
+        uid = data.get("uid")
+        username = data.get("username")
 
         user_data = {
             "username": username,
-            "source-language": "",
-            "target_language": "",
-            "history": []
+            "source-lang": "",
+            "target-lang": "",
+            "history": {},
         }
 
         db.collection("users").document(uid).set(user_data)
