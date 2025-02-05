@@ -1,12 +1,10 @@
-import React, { useState, useContext } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState, useContext, useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 
 import Ionicon from "react-native-vector-icons/Ionicons";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome6";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import {
-    GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { SetupContext } from "../contexts/setupContext";
 import { TranslationContext } from "../contexts/translationContext";
@@ -18,6 +16,8 @@ const ResultScreen = () => {
     console.log("Result Page Rendered");
 
     const MAX_ESP32_TEMP = 150;
+
+    const previousAlertState = useRef(null);
 
     const {
         langPrefDone,
@@ -71,6 +71,22 @@ const ResultScreen = () => {
             return "battery";
         }
     };
+
+    useEffect(() => {
+        if (temp < 30) {
+            if (previousAlertState.current !== "low") {
+                Alert.alert("Warning", "Device temperature too low!");
+                previousAlertState.current = "low";
+            }
+        } else if (temp > 809) {
+            if (previousAlertState.current !== "high") {
+                Alert.alert("Warning", "Device temperature too high!");
+                previousAlertState.current = "high";
+            }
+        } else {
+            previousAlertState.current = null; // Reset when temp is normal
+        }
+    }, [temp]);
 
     return (
         <View className="flex-1 bg-blue-100 h-[100%] items-center justify-center">
