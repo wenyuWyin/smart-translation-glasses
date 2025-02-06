@@ -22,7 +22,10 @@ def save_language_preference():
         source_lang = data.get("sourceLang")
         target_lang = data.get("targetLang")
 
-        if not uid or not source_lang or not target_lang:
+        if not uid:
+            return jsonify({"error": "Missing user ID"}), 400
+        
+        if not source_lang or not target_lang:
             return jsonify({"error": "Missing required fields"}), 400
 
         try:
@@ -40,7 +43,7 @@ def save_language_preference():
     elif request.method == "GET":
         uid = request.args.get("uid")
         if not uid:
-            return jsonify({"error": "UID is required"}), 400
+            return jsonify({"error": "Missing user ID"}), 400
 
         try:
             user_data = fetch_language_preference(uid)

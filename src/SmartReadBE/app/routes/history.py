@@ -29,7 +29,7 @@ def fetch_history(uid):
 
         return history_with_image
     except Exception as e:
-        raise Exception(f"Error fetching translation history: {e}")
+        raise Exception(e)
 
 
 def fetch_image(uid, image_id):
@@ -48,14 +48,14 @@ def fetch_image(uid, image_id):
         return formatted_date, image_base64
     except Exception as e:
         print(f"Error fetching image: {e}")
-        return None
+        raise Exception(e)
 
 
 @history_bp.route("/history", methods=["GET"])
-def save_language_preference():
+def fetch_translation_history():
     uid = request.args.get("uid")
     if not uid:
-        return jsonify({"error": "UID is required"}), 400
+        return jsonify({"error": "Missing user ID"}), 400
 
     try:
         user_history = fetch_history(uid)

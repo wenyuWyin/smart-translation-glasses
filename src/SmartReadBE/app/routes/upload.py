@@ -21,7 +21,7 @@ HEARTBEAT_TIMEOUT = 8
 @upload_bp.route("/upload/image", methods=["POST"])
 def upload_image():
     if "file" not in request.files and not request.data:
-        return "No file part", 400
+        return jsonify({"error": "No image file received"}), 400
 
     try:
         account_number = request.headers.get("Account-Number")
@@ -32,7 +32,6 @@ def upload_image():
             f.write(image_data)
         print(f"Image is saved to {filename} for {account_number}")
 
-        # image = cv2.imread(filename)
         nparr = np.frombuffer(image_data, np.uint8)
         # Decode the numpy array into an OpenCV image
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -54,10 +53,10 @@ def upload_image():
 
         task_manager.add_task(task)
 
-        return "Image received", 200
+        return jsonify({"message": "Image received successfully"}), 200
     except Exception as e:
         print(f"Error saving image: {e}")
-        return "Failed to save image", 500
+        return jsonify({"error": str(e)}), 500
 
 
 # Handler for receiving device status
@@ -73,13 +72,16 @@ def upload_status():
         temperature = data.get("temperature")
         connection_status = data.get("wifiStatus")
 
+        if not user_id:
+            return jsonify({"error": "Missing user ID"}), 400
+
         # Send device status to front-end through WebSocket
         send_status_update(user_id, battery, temperature, connection_status)
-        return "Status updated", 200
+        return jsonify({"message": "Status received successfully"}), 200
 
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Failed to process  request"}), 400
+        return jsonify({"error": str(e)}), 500
 
 
 # Handler for receiving heartbeat messages
@@ -90,13 +92,13 @@ def upload_heartbeat():
         user_id = data.get("account")
 
         if not user_id:
-            return jsonify({"error": "User ID is required"}), 400
+            return jsonify({"error": "Missing user ID"}), 400
 
         # Update last active from for the corresponding device
         device_heartbeats[user_id] = time.time()
         print(f"Heartbeat received from device {user_id}")
 
-        return jsonify({"message": "Heartbeat received"}), 200
+        return jsonify({"message": "Heartbeat received successfully"}), 200
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Failed to process heartbeat"}), 500
+        return jsonify({"error": str(e)}), 500

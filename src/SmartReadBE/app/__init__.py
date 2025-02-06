@@ -14,7 +14,7 @@ os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "2"
 
 
-def create_app():
+def create_app(manager_thread=True, heartbeat_thread=True):
     app = Flask(__name__)
     app.secret_key = os.getenv("SECRET_KEY")
 
@@ -43,10 +43,13 @@ def create_app():
     # Initialize socket IO
     socketio.init_app(app)
 
-    initialize_managers()
+    if manager_thread:
+        initialize_managers()
 
-    # Monitor heartbeat signals of each device on a separate thread
-    Thread(target=monitor_heartbeats, daemon=True).start()
-    Thread(target=run_task_manager, daemon=True).start()
+        Thread(target=run_task_manager, daemon=True).start()
 
+    if heartbeat_thread:
+        # Monitor heartbeat signals of each device on a separate thread
+        Thread(target=monitor_heartbeats, daemon=True).start()
+        
     return app
