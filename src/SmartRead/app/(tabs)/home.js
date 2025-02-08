@@ -121,7 +121,7 @@ const HomeScreen = () => {
                             await WifiManager.getCurrentWifiSSID();
                         console.log("Current SSID:", currentSSID);
 
-                        if (currentSSID !== "ESP32_CAM_AP") {
+                        if (!currentSSID.includes("ESP32_CAM_AP")) {
                             console.log("User connected to a local network!");
                             setAppConnected(true);
                         } else {

@@ -73,12 +73,12 @@ const ResultScreen = () => {
     };
 
     useEffect(() => {
-        if (temp < 30) {
+        if (temp < 30 && deviceConnected && appConnected) {
             if (previousAlertState.current !== "low") {
                 Alert.alert("Warning", "Device temperature too low!");
                 previousAlertState.current = "low";
             }
-        } else if (temp > 809) {
+        } else if (temp > 80 && deviceConnected && appConnected) {
             if (previousAlertState.current !== "high") {
                 Alert.alert("Warning", "Device temperature too high!");
                 previousAlertState.current = "high";

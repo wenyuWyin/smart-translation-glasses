@@ -57,6 +57,7 @@ class Task:
 
         if not segmentation_results:
             print(f"Image Segmentation failed for task {self.task_id}.")
+            send_image_process_status(self.user_id, TaskState.ERROR)
             return False
 
         print(f"Image Segmentation successfully for task {self.task_id}")
