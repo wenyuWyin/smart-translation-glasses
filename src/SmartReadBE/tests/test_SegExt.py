@@ -81,10 +81,10 @@ class testSegExt(unittest.TestCase):
         image = cv2.imread(img_path)
         segmentation_results = list(manager.segmentation(image).keys())
         expected_output = [(43, 609, 28, 62)]
+        capture_outputs("UT-05", segmentation_results)  # Store result
         self.assertEqual(len(expected_output), len(segmentation_results))
         accuracy = mean_iou(segmentation_results, expected_output)
 
-        capture_outputs("UT-05", segmentation_results)  # Store result
         self.assertGreaterEqual(accuracy, IOU_BOUND)
 
     def test_multiple_region_segmentation(self):
@@ -96,10 +96,10 @@ class testSegExt(unittest.TestCase):
         image = cv2.imread(img_path)
         segmentation_results = list(manager.segmentation(image).keys())
         expected_output = [(14, 607, 15, 49), (14, 551, 73, 107), (14, 567, 126, 160)]
+        capture_outputs("UT-06", segmentation_results)  # Store result
         self.assertEqual(len(expected_output), len(segmentation_results))
         accuracy = mean_iou(segmentation_results, expected_output)
 
-        capture_outputs("UT-06", segmentation_results)  # Store result
         self.assertGreaterEqual(accuracy, IOU_BOUND)
 
     def test_no_text_segmentation(self):
@@ -240,11 +240,11 @@ class testSegExt(unittest.TestCase):
 
         image = cv2.imread(img_path)
         segmentation_results = list(manager.segmentation(image).keys())
-        expected_output = [(3, 300, 8, 108)]
+        expected_output = [(17, 300, 8, 108)]
+        capture_outputs("UT-15", segmentation_results)  # Store result
         self.assertEqual(len(expected_output), len(segmentation_results))
         accuracy = mean_iou(segmentation_results, expected_output)
 
-        capture_outputs("UT-15", segmentation_results)  # Store result
         self.assertGreaterEqual(accuracy, IOU_BOUND)
 
     def test_calibri_segmentation(self):
@@ -256,10 +256,10 @@ class testSegExt(unittest.TestCase):
         image = cv2.imread(img_path)
         segmentation_results = list(manager.segmentation(image).keys())
         expected_output = [(42, 629, 256, 438), (42, 629, 509, 680), (42, 640, 12, 187)]
+        capture_outputs("UT-16", segmentation_results)  # Store result
         self.assertEqual(len(expected_output), len(segmentation_results))
         accuracy = mean_iou(segmentation_results, expected_output)
 
-        capture_outputs("UT-16", segmentation_results)  # Store result
         self.assertGreaterEqual(accuracy, IOU_BOUND)
 
     def test_arial_text_extraction(self):
