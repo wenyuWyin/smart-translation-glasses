@@ -49,7 +49,9 @@ class Task:
             "image": base64.b64encode(image_buffer).decode("utf-8"),
         }
 
-        send_image_process_status(self.user_id, TaskState.IMAGE_RECEIVED, data=socket_data)
+        send_image_process_status(
+            self.user_id, TaskState.IMAGE_RECEIVED, data=socket_data
+        )
         # Execute a task
         # Divide the image into sub-images -> Extract text on each sub-image -> Translate the extracted text
         segmentation_results = self.extraction_manager.segmentation(self.image)

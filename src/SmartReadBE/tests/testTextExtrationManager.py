@@ -3,7 +3,6 @@ Unit test file for TextExtractionModule
 """
 
 import unittest
-import pytest
 import numpy as np
 from TextExtractionModule.TextExtractionManager import TextExtractionManager as tem
 import cv2
@@ -57,10 +56,10 @@ def iou(boxA, boxB):
     yB = min(boxA[3], boxB[3])
 
     interArea = max(0, xB - xA) * max(0, yB - yA)
-    
+
     boxAArea = (boxA[1] - boxA[0]) * (boxA[3] - boxA[2])
     boxBArea = (boxB[1] - boxB[0]) * (boxB[3] - boxB[2])
-    
+
     unionArea = boxAArea + boxBArea - interArea
     return interArea / unionArea if unionArea > 0 else 0
 
@@ -126,7 +125,7 @@ class testSegExt(unittest.TestCase):
         expected_output = "The river flows gently through the valley, reflecting the golden sunset. Birds sing in the trees, while a cool breeze carries the scent of blooming flowers across the peaceful landscape."
         # text
         accuracy = levenshtein_accuracy(extracted_text, expected_output)
-        
+
         capture_outputs("UT-08", extracted_text)  # Store result
         self.assertGreaterEqual(accuracy, TEXT_ACC_BOUND)
 
@@ -142,7 +141,7 @@ class testSegExt(unittest.TestCase):
         In the digital age, innovation accelerates, connecting minds across continents. Yet, amidst progress, the quest for balance between advancement and ethics continues.
         She paused, reflecting on journeys taken and paths untraveled. Growth often blooms in quiet moments of introspection, where courage meets vulnerability."""  # text
         accuracy = levenshtein_accuracy(extracted_text, expected_output)
-        
+
         capture_outputs("UT-08-2", extracted_text)  # Store result
         self.assertGreaterEqual(accuracy, TEXT_ACC_BOUND)
 
