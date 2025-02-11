@@ -3,6 +3,7 @@ Unit test file for TextExtractionModule
 """
 
 import unittest
+from unittest.mock import patch, MagicMock
 import numpy as np
 from TextExtractionModule.TextExtractionManager import TextExtractionManager as tem
 import cv2
@@ -71,6 +72,46 @@ def mean_iou(ground_truth_boxes, extracted_boxes):
 
 
 class testSegExt(unittest.TestCase):
+    @patch("TextExtractionModule.TextExtractionManager.importlib.import_module")
+    def test_initialize_success(self, mock_import_module):
+        # UT-01-2: ExtractorsAndSegmentorsInitializationTest
+        manager = tem()
+        result = manager.initialize()
+
+        self.assertTrue(result)
+        self.assertEqual(len(manager.extractors), 1)
+        self.assertEqual(len(manager.segmentors), 1)
+
+    @patch("TextExtractionModule.TextExtractionManager.importlib.import_module")
+    def test_invalid_extractors_and_segmentors_handlers(self, mock_import_module):
+        # UT-02-2: InvalidExtractorsAndSegmentorsHandlersTest
+        # Simulate import failure
+        mock_import_module.side_effect = ImportError("Module not found")
+
+        manager = tem()
+        result = manager.initialize()
+
+        self.assertFalse(result)
+        self.assertEqual(len(manager.extractors), 0)
+        self.assertEqual(len(manager.segmentors), 0)
+        self.assertEqual(manager.avail_extractors, [])
+        self.assertEqual(manager.avail_segmentors, [])
+
+    @patch("TextExtractionModule.TextExtractionManager.importlib.import_module")
+    def test_no_available_extractors_and_segmentors_handler(self, mock_import_module):
+        # UT-03-2: NoAvailableExtractorsAndSegmentorsTest
+        manager = tem()
+        # Initialize a TranslationManager with no available handlers
+        manager.AVAILABLE_OCR_HANDLERS = []
+        manager.AVAILABLE_SEGMENTATION_HANDLERS = []
+        result = manager.initialize()
+
+        self.assertFalse(result)
+        self.assertEqual(len(manager.extractors), 0)
+        self.assertEqual(len(manager.segmentors), 0)
+        self.assertEqual(manager.avail_extractors, [])
+        self.assertEqual(manager.avail_segmentors, [])
+
     def test_single_region_segmentation(self):
         # UT-05 SingleRegionSegmentationTest
         manager = tem()
