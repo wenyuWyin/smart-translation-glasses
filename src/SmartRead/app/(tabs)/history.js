@@ -7,6 +7,8 @@ import {
     TouchableOpacity,
 } from "react-native";
 
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 import TranslationResultModal from "../components/translationResultModal";
 import fetchTranslationHistory from "../services/historyService";
 import { UserContext } from "../contexts/userContext";
@@ -106,7 +108,7 @@ const HistoryScreen = () => {
             </Text>
             <ActivityIndicator size="large" color="#ffffff" />
         </View>
-    ) : (
+    ) : history.length !== 0 ? (
         <View className="flex-1 justify-center items-center bg-blue-100 px-4">
             {selectedItem && (
                 <TranslationResultModal
@@ -122,6 +124,24 @@ const HistoryScreen = () => {
                 renderItem={renderItem}
                 className="p-4 bg-blue-100"
             />
+        </View>
+    ) : (
+        <View className="flex-1 justify-center items-center bg-blue-100 px-6">
+            <View className="flex-row items-center">
+                <FontAwesome
+                    className="mr-2"
+                    name="warning"
+                    size={20}
+                    color="#d98f14"
+                    fontSize={3}
+                />
+                <Text className="text-lg">
+                    No translation history available.
+                </Text>
+            </View>
+            <Text className="text-base text-gray-600 italic mt-2">
+                Please take an image using the device and try again later.
+            </Text>
         </View>
     );
 };
