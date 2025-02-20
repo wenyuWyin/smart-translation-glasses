@@ -14,24 +14,24 @@ extern "C" {
 // ----------------------------------------------------
 // 1. Config Constants
 // ----------------------------------------------------
-const char* ap_ssid = "ESP32_CAM_AP";
+const char* ap_ssid = "ESP32_CAM_AP_1";
 const char* ap_password = "12345678";
 
 // Change these URLs or endpoints to match your server
-// const char* serverUrl = "http://192.168.2.15:5000/upload/image";
-// const char* statusUrl = "http://192.168.2.15:5000/upload/status";
-// const char* heartbeatUrl = "http://192.168.2.15:5000/upload/heartbeat";
+const char* serverUrl = "http://192.168.2.15:5000/upload/image";
+const char* statusUrl = "http://192.168.2.15:5000/upload/status";
+const char* heartbeatUrl = "http://192.168.2.15:5000/upload/heartbeat";
 
-const char* serverUrl = "http://192.168.2.13:5000/upload/image";
-const char* statusUrl = "http://192.168.2.13:5000/upload/status";
-const char* heartbeatUrl = "http://192.168.2.13:5000/upload/heartbeat";
+// const char* serverUrl = "http://192.168.2.13:5000/upload/image";
+// const char* statusUrl = "http://192.168.2.13:5000/upload/status";
+// const char* heartbeatUrl = "http://192.168.2.13:5000/upload/heartbeat";
 #define EEPROM_SIZE 512
 #define SSID_ADDR 0
 #define PASS_ADDR 64
 #define ACCOUNT_ADDR 128
 #define MAX_CREDENTIAL_LENGTH 64
 #define BUTTON_PIN 14
-#define IDLE_TIMEOUT 2000000
+#define IDLE_TIMEOUT 200000000
 
 unsigned long lastButtonPressMillis = 0;
 bool isIdle = false;
@@ -436,7 +436,8 @@ void sendStatusToServer() {
     message += "\"temperature\":\"" + String(temperature, 2) + "\",";
     message += "\"wifiStatus\":\"" + wifiStatus + "\",";
     message += "\"battery\":\"" + batteryPercent + "\",";
-    message += "\"account\":\"" + storedAccount + "\"";
+    message += "\"account\":\"" + storedAccount + "\",";
+    message += "\"wifiName\":\"" + storedSsid + "\"";
     // message += "\"core\":\"" + core + "\",";
     // message += "\"core_after\":\"" + coreID + "\"";
     message += "}";
