@@ -60,7 +60,7 @@ def notify_disconnection(user_id):
         print(f"User {user_id} is not connected")
 
 
-def send_status_update(user_id, battery, temperature, connection_status):
+def send_status_update(user_id, battery, temperature, connection_status, wifi_name):
     """
     Notify the correct front-end app (based on user_id) about a device status update.
     """
@@ -71,6 +71,7 @@ def send_status_update(user_id, battery, temperature, connection_status):
             "battery": battery,
             "temperature": temperature,
             "wifiStatus": connection_status,
+            "wifiName": wifi_name,
         }
         print(f"Sending status update to user {user_id}: {data}")
         socketio.emit("status_update", data, to=target_sid)

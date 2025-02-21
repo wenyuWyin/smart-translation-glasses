@@ -9,6 +9,7 @@ export const SetupProvider = ({ children }) => {
     const [appConnected, setAppConnected] = useState(false);
     const [temp, setTemp] = useState("");
     const [battery, setBattery] = useState("");
+    const [deviceNetwork, setDeviceNetwork] = useState("");
 
     return (
         <SetupContext.Provider
@@ -23,6 +24,8 @@ export const SetupProvider = ({ children }) => {
                 setTemp,
                 battery,
                 setBattery,
+                deviceNetwork, 
+                setDeviceNetwork
             }}
         >
             {children}

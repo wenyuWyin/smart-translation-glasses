@@ -9,24 +9,16 @@ import { TranslationContext } from "../contexts/translationContext";
 
 const ServerWebSocket = () => {
     const {
-        langPrefDone,
-        setLangPrefDone,
-        deviceConnected,
         setDeviceConnected,
         appConnected,
-        setAppConnected,
-        temp,
         setTemp,
-        battery,
         setBattery,
+        setDeviceNetwork,
     } = useContext(SetupContext);
-    const { user, login, logout } = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const {
-        trnStateCode,
         setTrnStateCode,
-        trnImage,
         setTrnImage,
-        trnResult,
         setTrnResult,
     } = useContext(TranslationContext);
 
@@ -70,6 +62,7 @@ const ServerWebSocket = () => {
                 setTemp(data.temperature);
                 setDeviceConnected(data.wifiStatus === "Connected");
                 setBattery(data.battery);
+                setDeviceNetwork(data.wifiName)
             } catch (error) {
                 console.error("Error parsing WebSocket message: ", error);
             }
@@ -95,6 +88,7 @@ const ServerWebSocket = () => {
 
         socket.on("esp32_disconnect", () => {
             setDeviceConnected(false);
+            setDeviceNetwork("");
             console.log("WebSocket disconnected");
         });
 

@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 
 import { Dropdown } from "react-native-element-dropdown";
+import Ionicon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import WifiManager from "react-native-wifi-reborn";
@@ -37,10 +38,8 @@ const HomeScreen = () => {
         setDeviceConnected,
         appConnected,
         setAppConnected,
-        temp,
-        setTemp,
-        battery,
-        setBattery,
+        deviceNetwork,
+        setDeviceNetwork,
     } = useContext(SetupContext);
     const { user, login, logout } = useContext(UserContext);
 
@@ -255,8 +254,9 @@ const HomeScreen = () => {
             });
 
             setCameraConnecting(false);
-            setDeviceConnected(true);
+
             if (response.ok) {
+                setDeviceConnected(true);
                 Alert.alert("Success", "Credentials are sent to your device!");
                 router.push("/result");
             } else {
@@ -406,6 +406,32 @@ const HomeScreen = () => {
                         </Text>
                     </View>
 
+                    {deviceConnected && deviceNetwork && (
+                        <View className="flex-col items-center mb-4 bg-white rounded-lg border border-gray-300 shadow-md p-3">
+                            <View className="flex-col items-center">
+                                <View className="flex-row items-center">
+                                    <Ionicon
+                                        name="checkmark-circle"
+                                        size={20}
+                                        className="mr-2 mt-[2]"
+                                        color="#02b34b"
+                                    />
+                                    <Text className="text-base text-gray-700">
+                                        The device is connected to{" "}
+                                        <Text className="font-bold text-black">
+                                            {deviceNetwork}
+                                        </Text>
+                                    </Text>
+                                </View>
+
+                                <Text className="text-sm text-gray-500 mt-1">
+                                    You are free to reconnect to a different
+                                    network
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+
                     <View className="w-[90%] flex-col items-center pb-5">
                         <View className="flex-row items-center mb-4 min-w-[90%]">
                             <MaterialIcon
@@ -443,7 +469,11 @@ const HomeScreen = () => {
                         {/* Input Fields for Network Configurations */}
                         <View className="items-center w-[100%]">
                             <TextInput
-                                placeholder="Enter network name"
+                                placeholder={
+                                    deviceConnected && deviceNetwork
+                                        ? "Enter new network name"
+                                        : "Enter network name"
+                                }
                                 value={networkName}
                                 onChangeText={setNetworkName}
                                 className="border border-gray-400 rounded-lg p-3 mb-4 bg-white w-[80%]"
@@ -451,7 +481,11 @@ const HomeScreen = () => {
 
                             <View className="w-[80%] relative mb-4">
                                 <TextInput
-                                    placeholder="Enter network password"
+                                    placeholder={
+                                        deviceConnected && deviceNetwork
+                                            ? "Enter new network password"
+                                            : "Enter network password"
+                                    }
                                     value={networkPwd}
                                     onChangeText={setNetworkPwd}
                                     secureTextEntry={pwdVisible}
@@ -482,7 +516,9 @@ const HomeScreen = () => {
                                     onPress={sendCredentialsToCamera}
                                 >
                                     <Text className="text-white font-bold">
-                                        Connect
+                                        {deviceConnected && deviceNetwork
+                                            ? "Reconnect"
+                                            : "Connect"}
                                     </Text>
                                 </TouchableOpacity>
                             )}

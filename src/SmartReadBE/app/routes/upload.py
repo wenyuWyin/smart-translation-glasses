@@ -71,12 +71,13 @@ def upload_status():
         battery = data.get("battery")
         temperature = data.get("temperature")
         connection_status = data.get("wifiStatus")
+        device_network = data.get("wifiName")
 
         if not user_id:
             return jsonify({"error": "Missing user ID"}), 400
 
         # Send device status to front-end through WebSocket
-        send_status_update(user_id, battery, temperature, connection_status)
+        send_status_update(user_id, battery, temperature, connection_status, device_network)
         return jsonify({"message": "Status received successfully"}), 200
 
     except Exception as e:

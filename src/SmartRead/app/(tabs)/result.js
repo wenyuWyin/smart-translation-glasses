@@ -21,23 +21,15 @@ const ResultScreen = () => {
 
     const {
         langPrefDone,
-        setLangPrefDone,
         deviceConnected,
-        setDeviceConnected,
         appConnected,
-        setAppConnected,
         temp,
-        setTemp,
         battery,
-        setBattery,
     } = useContext(SetupContext);
     const {
         trnStateCode,
-        setTrnStateCode,
         trnImage,
-        setTrnImage,
         trnResult,
-        setTrnResult,
     } = useContext(TranslationContext);
 
     const [showHelp, setShowHelp] = useState(false);

@@ -16,7 +16,7 @@ import { UserContext } from "../contexts/userContext";
 const HistoryScreen = () => {
     console.log("History Page Rendered");
 
-    const { user, login, logout } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
