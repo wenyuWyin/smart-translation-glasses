@@ -12,7 +12,7 @@ import Animated, {
     runOnJS,
 } from "react-native-reanimated";
 
-const TranslationResult = ({ imageUri, result }) => {
+const TranslationResult = ({ imageUri, result, showInModal = false }) => {
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [imageRatio, setImageRatio] = useState(1);
     const [hideBackground, setHideBackground] = useState(false);
@@ -111,7 +111,15 @@ const TranslationResult = ({ imageUri, result }) => {
 
     return (
         // Use GestureHandlerRootView to detect gestures in a modal
-        <GestureHandlerRootView className="flex-1">
+        <GestureHandlerRootView
+            className="flex-1"
+            style={[
+                {
+                    width: dimensions.width * (showInModal ? imageRatio : 1),
+                    height: dimensions.height * (showInModal ? imageRatio : 1),
+                },
+            ]}
+        >
             <GestureDetector
                 gesture={Gesture.Exclusive(
                     panGesture,

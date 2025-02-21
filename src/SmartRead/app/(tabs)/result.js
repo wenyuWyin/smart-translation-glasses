@@ -190,7 +190,7 @@ const ResultScreen = () => {
                         </Text>
                     </View>
                     {trnImage && (
-                        <View className="flex-col w-[95%] h-[29%] rounded-xl">
+                        <View className="flex-col w-full h-full justify-center rounded-xl">
                             <TranslationResult
                                 imageUri={trnImage}
                                 result={trnResult || {}}

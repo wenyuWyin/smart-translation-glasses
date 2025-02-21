@@ -21,7 +21,7 @@ const TranslationResultModal = ({
             onRequestClose={closeModal}
         >
             <View className="flex-1 justify-center items-center bg-black/50">
-                <View className="flex-col w-[95%] h-[29%] bg-gray-100 rounded-xl">
+                <View className="flex-col w-[95%] bg-gray-100 rounded-xl">
                     <View className="flex-row justify-between mt-1">
                         {/* Help Icons */}
                         {showHelp ? (
@@ -77,7 +77,13 @@ const TranslationResultModal = ({
                         </TouchableOpacity>
                     </View>
                     {/* TranslationResult Component */}
-                    <TranslationResult imageUri={imageUri} result={result} />
+                    <View className="flex-col w-full justify-center items-center pt-2 pb-4">
+                        <TranslationResult
+                            imageUri={imageUri}
+                            result={result}
+                            showInModal={true}
+                        />
+                    </View>
                 </View>
             </View>
         </Modal>
