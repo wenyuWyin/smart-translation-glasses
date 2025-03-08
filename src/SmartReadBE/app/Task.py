@@ -32,6 +32,20 @@ class Task:
         self.source_language = source_language  # Source language for translation
         self.results = {}
 
+        # Save results to Firebase storage
+        storage_image_id = save_image(self.user_id)
+        _, image_buffer = cv2.imencode(".jpg", self.image)
+
+        socket_data = {
+            "image": base64.b64encode(image_buffer).decode("utf-8"),
+        }
+        # Send image to the UI
+        send_image_process_status(
+            self.user_id, TaskState.QUEUED, storage_image_id, data=socket_data
+        )
+
+        self.image_id = storage_image_id
+
     def get_status(self) -> bool:
         return self.task_status
 
@@ -43,15 +57,8 @@ class Task:
         return True
 
     def execute_task(self) -> bool:
-        _, image_buffer = cv2.imencode(".jpg", self.image)
-        socket_data = {
-            "state": TaskState.IMAGE_RECEIVED.value,
-            "image": base64.b64encode(image_buffer).decode("utf-8"),
-        }
-
-        send_image_process_status(
-            self.user_id, TaskState.IMAGE_RECEIVED, data=socket_data
-        )
+        send_image_process_status(self.user_id, TaskState.IMAGE_RECEIVED, self.image_id)
+        
         # Execute a task
         # Divide the image into sub-images -> Extract text on each sub-image -> Translate the extracted text
         segmentation_results = self.extraction_manager.segmentation(self.image)
@@ -59,7 +66,7 @@ class Task:
 
         if not segmentation_results:
             print(f"Image Segmentation failed for task {self.task_id}.")
-            send_image_process_status(self.user_id, TaskState.ERROR)
+            send_image_process_status(self.user_id, TaskState.ERROR, self.image_id)
             return False
 
         print(f"Image Segmentation successfully for task {self.task_id}")
@@ -68,7 +75,7 @@ class Task:
         # Each sub-image corresponds to an original text and translated text
         results = {key: {} for key in segmentation_results}
 
-        send_image_process_status(self.user_id, TaskState.TEXT_EXTRACTED)
+        send_image_process_status(self.user_id, TaskState.TEXT_EXTRACTED, self.image_id)
 
         # Extract text and translate for each sub-image
         print(f"Executing TextExtractionTask {self.task_id}")
@@ -102,18 +109,18 @@ class Task:
             results[key]["trn_text"] = translated_text
             print(f"Translation completed. Translated text: {translated_text}")
 
-        # Save results to Firebase storage and database
-        storage_image_id = save_image(self.user_id)
-        self.results[str(storage_image_id)] = results
+        # Update results dictionary
+        self.results[str(self.image_id)] = results
         self.save_task_result()
 
         print("Task results saved to Firebase")
 
         socket_data = {
-            "state": TaskState.TRANSLATED.value,
             "result": {str(key): value for key, value in results.items()},
         }
-        send_image_process_status(self.user_id, TaskState.TRANSLATED, data=socket_data)
+        send_image_process_status(
+            self.user_id, TaskState.TRANSLATED, self.image_id, data=socket_data
+        )
 
         return True
 

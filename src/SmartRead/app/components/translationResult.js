@@ -12,7 +12,12 @@ import Animated, {
     runOnJS,
 } from "react-native-reanimated";
 
-const TranslationResult = ({ imageUri, result, showInModal = false }) => {
+const TranslationResult = ({
+    imageUri,
+    result,
+    showInModal = false,
+    containerSize = {},
+}) => {
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [imageRatio, setImageRatio] = useState(1);
     const [hideBackground, setHideBackground] = useState(false);
@@ -34,13 +39,18 @@ const TranslationResult = ({ imageUri, result, showInModal = false }) => {
             uri,
             (width, height) => {
                 setDimensions({ width, height });
-                setImageRatio((window_size.width * 0.9) / width);
+                // Use parent's dimension for normal scaling and window's size for modal scaling
+                if (showInModal) {
+                    setImageRatio((window_size.width * 0.9) / width);
+                } else {
+                    setImageRatio((containerSize.width * 0.9) / width);
+                }
             },
             (error) => {
                 console.error("Failed to get image size:", error);
             }
         );
-    }, [imageUri]);
+    }, [imageUri, containerSize]);
 
     // Safe state update with `runOnJS`
     const toggleHideBackground = () => {
@@ -115,8 +125,8 @@ const TranslationResult = ({ imageUri, result, showInModal = false }) => {
             className="flex-1"
             style={[
                 {
-                    width: dimensions.width * (showInModal ? imageRatio : 1),
-                    height: dimensions.height * (showInModal ? imageRatio : 1),
+                    width: dimensions.width * imageRatio,
+                    height: dimensions.height * imageRatio,
                 },
             ]}
         >

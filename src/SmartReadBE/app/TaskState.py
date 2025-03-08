@@ -3,7 +3,9 @@ from enum import Enum
 
 class TaskState(Enum):
     IDLE = 1
-    IMAGE_RECEIVED = 2
-    TEXT_EXTRACTED = 3
-    TRANSLATED = 4
-    ERROR = 5
+    QUEUED = 2
+    IMAGE_RECEIVED = 3
+    TEXT_EXTRACTED = 4
+    TRANSLATED = 5
+    ERROR = 6
+    

@@ -16,11 +16,8 @@ const ServerWebSocket = () => {
         setDeviceNetwork,
     } = useContext(SetupContext);
     const { user } = useContext(UserContext);
-    const {
-        setTrnStateCode,
-        setTrnImage,
-        setTrnResult,
-    } = useContext(TranslationContext);
+    const { translationList, setTranslationList } =
+        useContext(TranslationContext);
 
     // Use a ref to store the WebSocket instance and heartbeat timeout
     const socketRef = useRef(null);
@@ -62,7 +59,7 @@ const ServerWebSocket = () => {
                 setTemp(data.temperature);
                 setDeviceConnected(data.wifiStatus === "Connected");
                 setBattery(data.battery);
-                setDeviceNetwork(data.wifiName)
+                setDeviceNetwork(data.wifiName);
             } catch (error) {
                 console.error("Error parsing WebSocket message: ", error);
             }
@@ -71,16 +68,45 @@ const ServerWebSocket = () => {
         // Event handler when a WebSocket image progress update message arrives
         socket.on("image_progress_update", async (data) => {
             try {
-                console.log("Message received from server", data);
+                console.log(
+                    `Message received from server ID: ${data.id} and State: ${data.state}`
+                );
 
-                setTrnStateCode(data.state);
-                if (data.image) {
-                    setTrnImage(data.image);
-                    setTrnResult(null);
+                if (data.id) {
+                    setTranslationList((prevList) => {
+                        const exists = prevList.some(
+                            (translation) => translation.id === data.id
+                        );
+
+                        if (!exists) {
+                            // Add new item if it doesn't exist
+                            return [
+                                ...prevList,
+                                {
+                                    id: data.id,
+                                    image: data.image,
+                                    status: data.state,
+                                    result: null,
+                                },
+                            ];
+                        } else {
+                            // Update the status if the item already exists
+                            return prevList.map((translation) =>
+                                translation.id === data.id
+                                    ? {
+                                          ...translation,
+                                          status: data.state,
+                                          result:
+                                              data.result !== null
+                                                  ? data.result
+                                                  : translation.result, // Only update if not null
+                                      }
+                                    : translation
+                            );
+                        }
+                    });
                 }
-                if (data.result) {
-                    setTrnResult(data.result);
-                }
+                // Update the translation list
             } catch (error) {
                 console.error("Error parsing WebSocket message: ", error);
             }

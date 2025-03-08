@@ -79,14 +79,17 @@ def send_status_update(user_id, battery, temperature, connection_status, wifi_na
         print(f"User {user_id} is not registered")
 
 
-def send_image_process_status(user_id, state, data=None):
+def send_image_process_status(user_id, state, image_id, data=None):
     """
     Notofy the correct front-end app about the progress of image processing
     """
     target_sid = user_sessions.get(user_id)
     if target_sid:
         if not data:
-            data = {"event": "image_progress_update", "state": state.value}
+            data = {}
+        data["id"] = str(image_id)
+        data["state"] = state.value
+        
         print(f"Sending image progress update to user {user_id}")
         socketio.emit("image_progress_update", data, to=target_sid)
     else:

@@ -4,19 +4,16 @@ export const TranslationContext = createContext();
 
 // Shared context for translation status and result
 export const TranslationProvider = ({ children }) => {
-    const [trnStateCode, setTrnStateCode] = useState(1);
-    const [trnImage, setTrnImage] = useState(null);
-    const [trnResult, setTrnResult] = useState(null);
+    const [translationList, setTranslationList] = useState([]);
+    const [translationIndex, setTranslationIndex] = useState(0);
 
     return (
         <TranslationContext.Provider
             value={{
-                trnStateCode,
-                setTrnStateCode,
-                trnImage,
-                setTrnImage,
-                trnResult,
-                setTrnResult,
+                translationList,
+                setTranslationList,
+                translationIndex,
+                setTranslationIndex,
             }}
         >
             {children}

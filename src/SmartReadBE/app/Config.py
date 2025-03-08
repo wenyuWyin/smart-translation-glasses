@@ -79,5 +79,6 @@ def run_task_manager():
                         task_manager.remove_task(task.task_id)
                 except Exception as e:
                     print(f"Executing Task {task.task_id} encounters an error: {e}")
+                    task_manager.remove_task(task.task_id)
             else:
                 print(f"Task {task.task_id} is not active")
