@@ -6,7 +6,7 @@ import importlib
 
 
 class TranslationManager:
-    AVALIABLETRANSLATOR = ["TranslationModule.GoogleTranslator"]
+    AVALIABLE_TRANSLATOR = ["TranslationModule.GoogleTranslator"]
 
     def __init__(self):
         # Initializes the TranslationManager
@@ -14,8 +14,11 @@ class TranslationManager:
         self.avail_translators = []
 
     def initialize(self) -> bool:
+        if not self.AVALIABLE_TRANSLATOR:
+            return False
+        
         try:
-            for translator_class_name in self.AVALIABLETRANSLATOR:
+            for translator_class_name in self.AVALIABLE_TRANSLATOR:
                 # Dynamically import the class from the current folder
                 class_name = translator_class_name.rsplit(".", 1)[1]
                 module = importlib.import_module(translator_class_name)

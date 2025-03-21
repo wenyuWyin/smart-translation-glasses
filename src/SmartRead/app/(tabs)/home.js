@@ -98,12 +98,17 @@ const HomeScreen = () => {
                             setLangPrefDone(true);
                         }
                     } else {
-                        const data = await response.json();
-                        throw new Error(data.error);
+                        if (response.status === 404) {
+                            throw new Error(
+                                "Server is down. Please try again later."
+                            );
+                        }
+                        throw new Error(
+                            "Unknown error. Please try again later."
+                        );
                     }
                 } catch (error) {
-                    console.error("Error in GET request", error);
-                    Alert.alert("Error", `Error in GET request: ${error}`);
+                    Alert.alert("Error", `${error.message}`);
                 }
             }
         };
@@ -186,6 +191,13 @@ const HomeScreen = () => {
         try {
             // Store language preferences in the database
             setLangLoading(true);
+
+            // Create AbortController and set a timeout for the post request
+            const controller = new AbortController();
+            const fetchTimeout = setTimeout(() => {
+                controller.abort();
+            }, 4000);
+
             const response = await fetch(
                 process.env.EXPO_PUBLIC_SERVER_IP_ADDRESS + "/lang-pref",
                 {
@@ -198,15 +210,30 @@ const HomeScreen = () => {
                         sourceLang: languageOptions[sourceLang - 1].label,
                         targetLang: languageOptions[targetLang - 1].label,
                     }),
+                    signal: controller.signal,
                 }
             );
 
+            clearTimeout(fetchTimeout);
             setLangLoading(false);
-            setLangPrefDone(true);
+
+            if (response.ok) {
+                setLangPrefDone(true);
+            } else {
+                if (response.status === 404) {
+                    throw new Error("Server is down. Please try again later.");
+                }
+                throw new Error("Unknown error. Please try again later.");
+            }
         } catch (error) {
-            console.log(
-                `An error occurred when saving language preferences - ${error}`
-            );
+            if (error.name === "AbortError") {
+                Alert.alert(
+                    "Error",
+                    "Request timed out. Please try again later."
+                );
+            } else {
+                Alert.alert("Error", `${error.message}`);
+            }
         }
     };
 

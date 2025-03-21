@@ -19,6 +19,9 @@ class TextExtractionManager:
         self.avail_segmentors = []
 
     def initialize(self) -> bool:
+        if not self.AVAILABLE_OCR_HANDLERS or not self.AVAILABLE_SEGMENTATION_HANDLERS:
+            return False
+
         try:
             # Need to initialize YOLO models before PaddleOCR models to avoid compatibility issue
             for segmentor_class_name in self.AVAILABLE_SEGMENTATION_HANDLERS:

@@ -31,7 +31,7 @@ class TestTranslationModule(unittest.TestCase):
         # UT-03: NoAvailableTranslatorHandlersTest
         manager = TranslationManager()
         # Initialize a TranslationManager with no available handlers
-        manager.AVALIABLETRANSLATOR = []
+        manager.AVALIABLE_TRANSLATOR = []
         result = manager.initialize()
 
         self.assertFalse(result)
