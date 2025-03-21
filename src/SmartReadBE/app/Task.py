@@ -16,6 +16,7 @@ class Task:
         task_id: int,
         extraction_manager: TextExtractionManager,
         image: cv2.Mat,
+        processed_image: cv2.Mat,
         translation_manager: TranslationManager,
         target_language: str,
         source_language: str,
@@ -27,6 +28,7 @@ class Task:
 
         self.extraction_manager = extraction_manager  # TextExtractionManager instance
         self.image = image  # Image for text extraction
+        self.processed_image = processed_image
         self.translation_manager = translation_manager
         self.target_language = target_language  # Target language for translation
         self.source_language = source_language  # Source language for translation
@@ -61,7 +63,7 @@ class Task:
         
         # Execute a task
         # Divide the image into sub-images -> Extract text on each sub-image -> Translate the extracted text
-        segmentation_results = self.extraction_manager.segmentation(self.image)
+        segmentation_results = self.extraction_manager.segmentation(self.processed_image)
         print("Segmentation completed")
 
         if not segmentation_results:

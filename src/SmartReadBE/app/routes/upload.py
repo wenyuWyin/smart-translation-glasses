@@ -36,6 +36,12 @@ def upload_image():
         # Decode the numpy array into an OpenCV image
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
+        # Apply preprocessing algorithms on the image
+        processed_image = image_preprocessing(image)
+        # processed_image = image
+        filename = os.path.join(UPLOAD_FOLDER, "processed_image.jpg")
+        cv2.imwrite(filename, processed_image)
+
         user_data = fetch_language_preference(account_number)
         source_lang = user_data["source-lang"]
         target_lang = user_data["target-lang"]
@@ -45,6 +51,7 @@ def upload_image():
             len(task_manager.task_queue) + 1,
             extraction_manager,
             image,
+            processed_image,
             translation_manager,
             target_lang,
             source_lang,
@@ -77,7 +84,9 @@ def upload_status():
             return jsonify({"error": "Missing user ID"}), 400
 
         # Send device status to front-end through WebSocket
-        send_status_update(user_id, battery, temperature, connection_status, device_network)
+        send_status_update(
+            user_id, battery, temperature, connection_status, device_network
+        )
         return jsonify({"message": "Status received successfully"}), 200
 
     except Exception as e:
@@ -103,3 +112,24 @@ def upload_heartbeat():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+def image_preprocessing(image):
+    bright_image = cv2.convertScaleAbs(image, alpha=1.2, beta=40)
+
+    # Convert to custom grayscale: 0.3*R + 0.59*G + 0.11*B
+    B = bright_image[:, :, 0].astype(float)
+    G = bright_image[:, :, 1].astype(float)
+    R = bright_image[:, :, 2].astype(float)
+    custom_grayscale = (0.3 * R + 0.59 * G + 0.11 * B).astype(np.uint8)
+
+    denoised = cv2.bilateralFilter(custom_grayscale, d=3, sigmaColor=20, sigmaSpace=10)
+
+    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=10, tileGridSize=(16, 16))
+    clahe_image = clahe.apply(denoised)
+
+    # Convert back to 3-channel if you need a color image output
+    final_image = cv2.cvtColor(clahe_image, cv2.COLOR_GRAY2BGR)
+
+    return final_image

@@ -26,13 +26,13 @@ class YoloSegmentationHandler(IImageSegmentationHandler):
 
         # Warm-up model during initialization to allocate resource to YOLO models in advance
         dummy_image = np.zeros((640, 640, 3), dtype=np.uint8)
-        self.model(dummy_image)
+        self.model(dummy_image, verbose=False)
 
     def imageSegmentation(self, image: cv2.Mat) -> Dict[tuple, cv2.Mat]:
         try:
             print("Image segmentation started")
             # Segment the image into sub-images
-            results = self.model(image)
+            results = self.model(image, verbose=False)
             result = results[0]
 
             self.result = {}
