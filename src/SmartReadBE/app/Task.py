@@ -113,16 +113,19 @@ class Task:
 
         # Update results dictionary
         self.results[str(self.image_id)] = results
-        self.save_task_result()
 
-        print("Task results saved to Firebase")
-
+        # Return results back to frontend
         socket_data = {
             "result": {str(key): value for key, value in results.items()},
         }
         send_image_process_status(
             self.user_id, TaskState.TRANSLATED, self.image_id, data=socket_data
         )
+
+        # Save to Firebase
+        self.save_task_result()
+
+        print("Task results saved to Firebase")
 
         return True
 
