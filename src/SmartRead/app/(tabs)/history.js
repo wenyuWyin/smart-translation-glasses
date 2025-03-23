@@ -24,23 +24,21 @@ const HistoryScreen = () => {
     const [history, setHistory] = useState([]);
 
     // Fetch translation history when entering the page
+    const fetchHistory = async () => {
+        try {
+            console.log("Fetching translation history...");
+            setLoadingHistory(true);
+            const fetchedHistory = await fetchTranslationHistory(user.user_id);
+
+            setHistory(fetchedHistory || []);
+        } catch (error) {
+            console.error("Error fetching translation history:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                console.log("Fetching translation history...");
-                setLoadingHistory(true);
-                const fetchedHistory = await fetchTranslationHistory(
-                    user.user_id
-                );
-
-                setHistory(fetchedHistory || []);
-            } catch (error) {
-                console.error("Error fetching translation history:", error);
-            } finally {
-                setLoadingHistory(false);
-            }
-        };
-
         fetchHistory();
     }, [user.user_id]);
 
@@ -122,8 +120,17 @@ const HistoryScreen = () => {
                 data={history}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={renderItem}
-                className="p-4 bg-blue-100"
+                className="p-4 bg-blue-100 mb-5"
             />
+
+            <TouchableOpacity
+                className="px-3 py-2 mb-5 bg-blue-950 rounded-lg w-[50%] items-center"
+                onPress={fetchHistory}
+            >
+                <Text className="text-white font-bold">
+                    Refresh
+                </Text>
+            </TouchableOpacity>
         </View>
     ) : (
         <View className="flex-1 justify-center items-center bg-blue-100 px-6">
