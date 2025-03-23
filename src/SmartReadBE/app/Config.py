@@ -2,7 +2,6 @@ import time
 from firebase_admin import credentials, firestore
 import firebase_admin
 
-from .TaskManager import TaskManager
 from TextExtractionModule.TextExtractionManager import TextExtractionManager
 from TranslationModule.TranslationManager import TranslationManager
 
@@ -10,7 +9,6 @@ device_heartbeats = {}  # Tracks ESP32 devices and their last heartbeat time
 HEARTBEAT_TIMEOUT = 10  # Timeout in seconds for detecting disconnection
 
 
-task_manager = TaskManager()
 extraction_manager = TextExtractionManager()
 translation_manager = TranslationManager()
 
@@ -35,7 +33,6 @@ db = initialize_firebase()
 
 def initialize_managers():
     print("Initializing managers")
-    task_manager.initialize()
     extraction_manager.initialize()
     translation_manager.initialize()
     print("Managers initialized")
@@ -59,26 +56,3 @@ def monitor_heartbeats():
             del device_heartbeats[user_id]
             print(f"User {user_id} is disconnected due to timeout")
             notify_disconnection(user_id)
-
-
-def run_task_manager():
-    task_manager.activate_queue()
-    while True:
-        if task_manager.task_queue:
-            print(f"{len(task_manager.task_queue)} tasks left in the queue")
-            task = task_manager.task_queue[0]
-            if task.get_status():
-                print(f"Exceuting Task {task.task_id}")
-                try:
-                    success = task.execute_task()
-                    if success:
-                        print(f"Task {task.task_id} executed successfully")
-                        task_manager.remove_task(task.task_id)
-                    else:
-                        print(f"Task {task.task_id} failed")
-                        task_manager.remove_task(task.task_id)
-                except Exception as e:
-                    print(f"Executing Task {task.task_id} encounters an error: {e}")
-                    task_manager.remove_task(task.task_id)
-            else:
-                print(f"Task {task.task_id} is not active")

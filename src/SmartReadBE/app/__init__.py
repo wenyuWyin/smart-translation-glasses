@@ -3,8 +3,9 @@ from flask import Flask
 from threading import Thread
 from datetime import timedelta
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 
-from .Config import monitor_heartbeats, run_task_manager, initialize_managers
+from .Config import monitor_heartbeats, initialize_managers
 from .WebSocketHandler import socketio
 
 load_dotenv()
@@ -14,7 +15,7 @@ os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "2"
 
 
-def create_app(manager_thread=True, heartbeat_thread=True):
+def create_app(heartbeat_thread=True):
     app = Flask(__name__)
     app.secret_key = os.getenv("SECRET_KEY")
 
@@ -43,10 +44,16 @@ def create_app(manager_thread=True, heartbeat_thread=True):
     # Initialize socket IO
     socketio.init_app(app)
 
-    if manager_thread:
-        initialize_managers()
+    # Initialize the ThreadPoolExecutor
+    app.executor = ThreadPoolExecutor(max_workers=4)
 
-        Thread(target=run_task_manager, daemon=True).start()
+    initialize_managers()
+
+    # Shutdown the executor when the app stops
+    @app.teardown_appcontext
+    def shutdown_executor(exception=None):
+        if hasattr(app, "executor"):
+            app.executor.shutdown(wait=True)
 
     if heartbeat_thread:
         # Monitor heartbeat signals of each device on a separate thread

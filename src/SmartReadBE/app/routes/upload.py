@@ -1,9 +1,9 @@
 import time
-from flask import Blueprint, request, jsonify
+from flask import current_app, Blueprint, request, jsonify
 from app.Config import device_heartbeats
 from app.WebSocketHandler import send_status_update
 from app.Task import Task
-from app.Config import task_manager, extraction_manager, translation_manager
+from app.Config import extraction_manager, translation_manager
 from .langPref import fetch_language_preference
 import os
 import cv2
@@ -48,7 +48,7 @@ def upload_image():
 
         task = Task(
             account_number,
-            len(task_manager.task_queue) + 1,
+            len(current_app.executor._work_queue) + 1,
             extraction_manager,
             image,
             processed_image,
@@ -58,7 +58,8 @@ def upload_image():
         )
         task.initialize()
 
-        task_manager.add_task(task)
+        current_app.executor.submit(task.execute_task)
+        print(f"Task {task.task_id} submitted to the executor")
 
         return jsonify({"message": "Image received successfully"}), 200
     except Exception as e:

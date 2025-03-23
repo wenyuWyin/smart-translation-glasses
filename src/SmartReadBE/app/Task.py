@@ -1,12 +1,20 @@
 import cv2
 import uuid
 import base64
+from threading import Lock
 
 from TextExtractionModule.TextExtractionManager import TextExtractionManager
 from TranslationModule.TranslationManager import TranslationManager
 from TranslationModule.LanguageConvertor import convert_language
 from .WebSocketHandler import send_image_process_status
 from .TaskState import TaskState
+
+
+# Global lock for Firebase Storage
+firebase_storage_lock = Lock()
+
+# Global lock for Firestore
+firestore_lock = Lock()
 
 
 class Task:
@@ -128,14 +136,7 @@ class Task:
         print("Task results saved to Firebase")
 
         return True
-
-    def terminate_task(self) -> bool:
-        if not self.get_status():
-            print(f"Task {self.task_id} is not active.")
-            return False
-        print(f"Terminating task {self.task_id}")
-        self.set_status(False)
-        return True
+    
 
     def save_task_result(self) -> bool:
         from .Config import db
@@ -150,39 +151,42 @@ class Task:
             }
             for url, nested_dict in self.results.items()
         }
-        try:
-            user_ref = db.collection("users").document(self.user_id)
-            user_ref.set({"history": serialized_data}, merge=True)
-            print(f"Data successfully stored for user: {self.user_id}")
 
-            return True
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        with firestore_lock:  # Acquire the lock
+            try:
+                user_ref = db.collection("users").document(self.user_id)
+                user_ref.set({"history": serialized_data}, merge=True)
+                print(f"Data successfully stored for user: {self.user_id}")
 
-            return False
+                return True
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+                return False
 
 
 def save_image(user_id: int):
     from firebase_admin import storage
 
-    image_id = uuid.uuid4()
-    local_file_path = "TEMP/image.jpg"
-    destination_blob_name = f"{user_id}/{image_id}.jpg"
+    with firebase_storage_lock:  # Acquire the lock
+        image_id = uuid.uuid4()
+        local_file_path = "TEMP/image.jpg"
+        destination_blob_name = f"{user_id}/{image_id}.jpg"
 
-    bucket = storage.bucket()
-    blob = bucket.blob(destination_blob_name)
+        bucket = storage.bucket()
+        blob = bucket.blob(destination_blob_name)
 
-    try:
-        # Upload the file
-        blob.upload_from_filename(local_file_path)
+        try:
+            # Upload the file
+            blob.upload_from_filename(local_file_path)
 
-        # Make the file publicly accessible (optional)
-        blob.make_public()
+            # Make the file publicly accessible (optional)
+            blob.make_public()
 
-        print(f"File uploaded successfully. Public URL: {blob.public_url}")
+            print(f"File uploaded successfully. Public URL: {blob.public_url}")
 
-        return image_id
-    except Exception as e:
-        print(f"An error occurred: {e}")
+            return image_id
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-        return None
+            return None

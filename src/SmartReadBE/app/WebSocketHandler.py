@@ -1,5 +1,6 @@
 from flask_socketio import SocketIO, emit
 from flask import request
+from threading import Lock
 
 from .TaskState import TaskState
 
@@ -8,6 +9,9 @@ user_sessions = {}
 
 # Initialize Flask app and SocketIO
 socketio = SocketIO(cors_allowed_origins="*")
+
+# Global lock for WebSocket communication
+websocket_lock = Lock()
 
 
 @socketio.on("connect")
@@ -83,14 +87,15 @@ def send_image_process_status(user_id, state, image_id, data=None):
     """
     Notofy the correct front-end app about the progress of image processing
     """
-    target_sid = user_sessions.get(user_id)
-    if target_sid:
-        if not data:
-            data = {}
-        data["id"] = str(image_id)
-        data["state"] = state.value
-        
-        print(f"Sending image progress update to user {user_id}")
-        socketio.emit("image_progress_update", data, to=target_sid)
-    else:
-        print(f"User {user_id} is not registered")
+    with websocket_lock:  # Acquire the lock
+        target_sid = user_sessions.get(user_id)
+        if target_sid:
+            if not data:
+                data = {}
+            data["id"] = str(image_id)
+            data["state"] = state.value
+            
+            print(f"Sending image progress update to user {user_id}")
+            socketio.emit("image_progress_update", data, to=target_sid)
+        else:
+            print(f"User {user_id} is not registered")
