@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 from firebase_admin import storage
-from ..Config import db
 import base64
+from concurrent.futures import ThreadPoolExecutor
+
+from ..Config import db
 
 history_bp = Blueprint("history", __name__)
 
@@ -16,16 +18,26 @@ def fetch_history(uid):
         history = user_data.get("history", {})
 
         history_with_image = []
-        for image_id, result in history.items():
+
+        def fetch_item(image_id, result):
             last_updated, image = fetch_image(uid, image_id)
             if last_updated and image:
-                history_with_image.append({
+                return {
                     "translate_time": last_updated,
                     "image": image,
-                    "result": result
-                })
+                    "result": result,
+                }
             else:
                 raise Exception("Cannot fetch image.")
+
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = [
+                executor.submit(fetch_item, image_id, result)
+                for image_id, result in history.items()
+            ]
+
+            for future in futures:
+                history_with_image.append(future.result())
 
         return history_with_image
     except Exception as e:

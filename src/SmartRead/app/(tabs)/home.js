@@ -22,7 +22,6 @@ import NetInfo from "@react-native-community/netinfo";
 import auth from "@react-native-firebase/auth";
 
 import styles from "../styles/styles";
-import TopRightButton from "../components/topRightButton";
 import { SetupContext } from "../contexts/setupContext";
 import { UserContext } from "../contexts/userContext";
 
@@ -219,6 +218,7 @@ const HomeScreen = () => {
 
             if (response.ok) {
                 setLangPrefDone(true);
+                Alert.alert("Success", "Successfully updated language preferences!")
             } else {
                 if (response.status === 404) {
                     throw new Error("Server is down. Please try again later.");
@@ -236,6 +236,15 @@ const HomeScreen = () => {
             }
         }
     };
+
+    // Swap target language with source language
+    const swapLanguagePreference = () => {
+        const source = sourceLang;
+        const target = targetLang;
+
+        setSourceLang(target);
+        setTargetLang(source);
+    }
 
     // Navigate to system setting page for users to connect to the camera access point
     const connectToCamera = async () => {
@@ -311,20 +320,9 @@ const HomeScreen = () => {
                 keyboardShouldPersistTaps="handled"
             >
                 <View className="flex-1 bg-blue-100 h-[100%] items-center">
-                    {/* Left Menu Button */}
-                    <TopRightButton
-                        IconComponent={
-                            <MaterialCommunityIcon name="menu" size={30} />
-                        }
-                        onPress={() => {
-                            logout();
-                            router.replace("/login");
-                        }}
-                    />
-
                     {/* Step 1 - Specify Language Preferences */}
                     <View className="w-[90%] flex-col items-center py-3">
-                        <View className="flex-row items-start mb-4 mt-8">
+                        <View className="flex-row items-start mb-4 mt-4">
                             <Text className="text-lg font-bold">
                                 Specify your Language Preferences
                             </Text>
@@ -368,6 +366,20 @@ const HomeScreen = () => {
                                 )}
                             />
                         </View>
+
+                        {/* Swap target and source languages */}
+                        {sourceLang && targetLang && (
+                            <TouchableOpacity
+                                className="px-3 rounded-xl w-[14%] items-center"
+                                onPress={swapLanguagePreference}
+                            >
+                                <MaterialCommunityIcon
+                                    className=""
+                                    name="swap-vertical"
+                                    size={20}
+                                />
+                            </TouchableOpacity>
+                        )}
 
                         <View className="flex-col w-[80%] mb-4">
                             <Text className="text-left text-lg mb-2">To: </Text>
@@ -459,7 +471,7 @@ const HomeScreen = () => {
                         </View>
                     )}
 
-                    <View className="w-[90%] flex-col items-center pb-5">
+                    <View className="w-[90%] flex-col items-center">
                         <View className="flex-row items-center mb-4 min-w-[90%]">
                             <MaterialIcon
                                 name="looks-one"
@@ -531,7 +543,7 @@ const HomeScreen = () => {
                             </View>
                         </View>
 
-                        <View className="w-[80%] items-center mb-5">
+                        <View className="w-[80%] items-center">
                             {cameraConnecting ? (
                                 <ActivityIndicator
                                     size="large"
@@ -552,7 +564,19 @@ const HomeScreen = () => {
                         </View>
                     </View>
 
-                    <View className="w-[90%] flex-col items-center py-5"></View>
+                    <View className="border-b-2 border-black w-[90%] my-5" />
+
+                    <TouchableOpacity
+                        className="px-3 py-2 bg-[#993a25]  rounded-lg w-[50%] items-center"
+                        onPress={() => {
+                            logout();
+                            router.replace("/login");
+                        }}
+                    >
+                        <Text className="text-white font-bold">Logout</Text>
+                    </TouchableOpacity>
+
+                    <View className="w-[90%] flex-col items-center py-5" />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
