@@ -45,15 +45,10 @@ def create_app(heartbeat_thread=True):
     socketio.init_app(app)
 
     # Initialize the ThreadPoolExecutor
+    print("Initializing task executor")
     app.executor = ThreadPoolExecutor(max_workers=4)
 
     initialize_managers()
-
-    # Shutdown the executor when the app stops
-    @app.teardown_appcontext
-    def shutdown_executor(exception=None):
-        if hasattr(app, "executor"):
-            app.executor.shutdown(wait=True)
 
     if heartbeat_thread:
         # Monitor heartbeat signals of each device on a separate thread

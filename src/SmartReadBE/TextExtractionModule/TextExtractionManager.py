@@ -36,8 +36,8 @@ class TextExtractionManager:
                     print(f"Error: Class {class_name} not found.")
                     return False
 
-                # Create two instances of the class
-                for _ in range(2):
+                # Create four instances of the class (at most four tasks are executed concurrently)
+                for _ in range(4):
                     instance = segmentor_class()  # Create an instance of the class
                     self.segmentors[instance.getID()] = (
                         instance  # Store the instance in the dictionary
@@ -56,8 +56,8 @@ class TextExtractionManager:
                     print(f"Error: Class {class_name} not found.")
                     return False
 
-                # Create two instances of the class
-                for _ in range(2):
+                # Create four instances of the class
+                for _ in range(4):
                     instance = ocr_class()  # Create an instance of the class
                     self.extractors[instance.getID()] = (
                         instance  # Store the instance in the dictionary

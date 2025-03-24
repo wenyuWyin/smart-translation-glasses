@@ -8,6 +8,7 @@ from .langPref import fetch_language_preference
 import os
 import cv2
 import numpy as np
+import uuid
 
 UPLOAD_FOLDER = "TEMP"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -48,7 +49,7 @@ def upload_image():
 
         task = Task(
             account_number,
-            len(current_app.executor._work_queue) + 1,
+            uuid.uuid4(),
             extraction_manager,
             image,
             processed_image,

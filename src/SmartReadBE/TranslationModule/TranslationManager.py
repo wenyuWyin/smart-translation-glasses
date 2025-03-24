@@ -30,8 +30,8 @@ class TranslationManager:
                     print(f"Error: Class {class_name} not found.")
                     return False
 
-                # Create two instances of the class
-                for i in range(2):
+                # Create four instances of the class (at most four tasks are executed concurrently)
+                for i in range(4):
                     instance = translator_class()  # Create an instance of the class
                     self.translators[instance.getID()] = (
                         instance  # Store the instance in the dictionary
