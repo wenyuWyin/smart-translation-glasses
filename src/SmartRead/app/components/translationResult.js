@@ -170,9 +170,6 @@ const TranslationResult = ({
                             const rectWidth = (x2 - x1) * imageRatio;
                             const rectHeight = (y2 - y1) * imageRatio;
 
-                            const fontSize =
-                                Math.max(rectWidth, rectHeight) / 5;
-
                             return (
                                 <View
                                     key={rect}
@@ -182,15 +179,12 @@ const TranslationResult = ({
                                     style={{
                                         left,
                                         top,
+                                        width: rectWidth,
+                                        height: rectHeight,
                                     }}
                                 >
                                     <Text
                                         className="text-blue-800 text-center"
-                                        style={{
-                                            width: rectWidth,
-                                            height: rectHeight,
-                                            fontSize,
-                                        }}
                                         adjustsFontSizeToFit
                                     >
                                         {hideBackground &&
